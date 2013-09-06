@@ -41,7 +41,9 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/gnuscripts/vcsID.common
 subdir = src/pulsar/TwoSpect
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/gnuscripts/ax_mpi.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/gnuscripts/ax_blas.m4 \
+	$(top_srcdir)/gnuscripts/ax_lapack.m4 \
+	$(top_srcdir)/gnuscripts/ax_mpi.m4 \
 	$(top_srcdir)/gnuscripts/lalapps.m4 \
 	$(top_srcdir)/gnuscripts/lalsuite_build.m4 \
 	$(top_srcdir)/gnuscripts/lalsuite_gccflags.m4 \
@@ -127,13 +129,16 @@ AUTOCONF = ${SHELL} /home/grant.meadors/src/lscsoft/lalsuite/lalapps/gnuscripts/
 AUTOHEADER = ${SHELL} /home/grant.meadors/src/lscsoft/lalsuite/lalapps/gnuscripts/missing --run autoheader
 AUTOMAKE = ${SHELL} /home/grant.meadors/src/lscsoft/lalsuite/lalapps/gnuscripts/missing --run automake-1.11
 AWK = gawk
+BAMBI_CFLAGS = 
+BAMBI_LIBS = 
 BIBTEX = bibtex
+BLAS_LIBS = 
 BOINC_PREFIX = 
 CC = condor_compile gcc -std=gnu99
 CCDEPMODE = depmode=gcc3
 CFITSIO_CFLAGS = 
 CFITSIO_LIBS = 
-CFLAGS = -g -O2 -g3 -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -fno-common -Wnested-externs -Wno-format-zero-length -fno-strict-aliasing -Wno-unused-result
+CFLAGS = -g -O2 
 CLANG_CC = 
 CLANG_CXX = 
 CONDOR_COMPILE = condor_compile
@@ -148,7 +153,7 @@ CXXFLAGS =
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
-DISTCHECK_CONFIGURE_FLAGS =  '--enable-condor' 'PKG_CONFIG_PATH=/home/grant.meadors/master/opt/lscsoft/lalinference/lib/pkgconfig:/home/grant.meadors/master/opt/lscsoft/lalpulsar/lib/pkgconfig:/home/grant.meadors/master/opt/lscsoft/lalstochastic/lib/pkgconfig:/home/grant.meadors/master/opt/lscsoft/lalinspiral/lib/pkgconfig:/home/grant.meadors/master/opt/lscsoft/lalburst/lib/pkgconfig:/home/grant.meadors/master/opt/lscsoft/lalsimulation/lib/pkgconfig:/home/grant.meadors/master/opt/lscsoft/lalmetaio/lib/pkgconfig:/home/grant.meadors/master/opt/lscsoft/lalframe/lib/pkgconfig:/home/grant.meadors/master/opt/lscsoft/lal/lib/pkgconfig'
+DISTCHECK_CONFIGURE_FLAGS =  '--enable-condor' '--disable-gcc-flags' '--disable-debug' 'PKG_CONFIG_PATH=/home/grant.meadors/master/opt/lscsoft/lalinference/lib/pkgconfig:/home/grant.meadors/master/opt/lscsoft/lalpulsar/lib/pkgconfig:/home/grant.meadors/master/opt/lscsoft/lalstochastic/lib/pkgconfig:/home/grant.meadors/master/opt/lscsoft/lalinspiral/lib/pkgconfig:/home/grant.meadors/master/opt/lscsoft/lalburst/lib/pkgconfig:/home/grant.meadors/master/opt/lscsoft/lalsimulation/lib/pkgconfig:/home/grant.meadors/master/opt/lscsoft/lalmetaio/lib/pkgconfig:/home/grant.meadors/master/opt/lscsoft/lalframe/lib/pkgconfig:/home/grant.meadors/master/opt/lscsoft/lal/lib/pkgconfig'
 DLLTOOL = false
 DSYMUTIL = 
 DUMPBIN = 
@@ -158,9 +163,12 @@ ECHO_N = -n
 ECHO_T = 
 EGREP = /bin/grep -E
 EXEEXT = 
+F77 = 
+FFLAGS = 
 FFTW3_CFLAGS =  
 FFTW3_LIBS = -lfftw3 -lfftw3f -lm  
 FGREP = /bin/grep -F
+FLIBS = 
 FRAME_CFLAGS =  
 FRAME_LIBS = -lm -lFrame  
 GENERATE_VCS_INFO = $(PYTHON) $(top_srcdir)/../gnuscripts/generate_vcs_info.py --git-path='$(GIT)' $(genvcsinfo_$(V))
@@ -207,6 +215,7 @@ LALXML_LIBS =
 LAL_CFLAGS = -I/home/grant.meadors/master/opt/lscsoft/lal/include  
 LAL_DATADIR = /home/grant.meadors/master/opt/lscsoft/lal/share/lal
 LAL_LIBS = -L/home/grant.meadors/master/opt/lscsoft/lal/lib -llal -lgsl -lgslcblas -lfftw3 -lfftw3f -lm  
+LAPACK_LIBS = 
 LATEX = pdflatex
 LD = /usr/bin/ld -m elf_x86_64
 LDFLAGS =  -L/home/grant.meadors/master/opt/lscsoft/lal/lib -L/home/grant.meadors/master/opt/lscsoft/lal/lib -L/home/grant.meadors/master/opt/lscsoft/lalframe/lib -L/home/grant.meadors/master/opt/lscsoft/lal/lib -L/home/grant.meadors/master/opt/lscsoft/lalmetaio/lib -L/home/grant.meadors/master/opt/lscsoft/lal/lib -L/home/grant.meadors/master/opt/lscsoft/lalsimulation/lib -L/home/grant.meadors/master/opt/lscsoft/lal/lib -L/home/grant.meadors/master/opt/lscsoft/lalburst/lib -L/home/grant.meadors/master/opt/lscsoft/lalsimulation/lib -L/home/grant.meadors/master/opt/lscsoft/lalmetaio/lib -L/home/grant.meadors/master/opt/lscsoft/lal/lib -L/home/grant.meadors/master/opt/lscsoft/lalinspiral/lib -L/home/grant.meadors/master/opt/lscsoft/lalsimulation/lib -L/home/grant.meadors/master/opt/lscsoft/lalmetaio/lib -L/home/grant.meadors/master/opt/lscsoft/lal/lib -L/home/grant.meadors/master/opt/lscsoft/lalpulsar/lib -L/home/grant.meadors/master/opt/lscsoft/lal/lib -L/home/grant.meadors/master/opt/lscsoft/lalinference/lib -L/home/grant.meadors/master/opt/lscsoft/lalpulsar/lib -L/home/grant.meadors/master/opt/lscsoft/lalinspiral/lib -L/home/grant.meadors/master/opt/lscsoft/lalsimulation/lib -L/home/grant.meadors/master/opt/lscsoft/lalmetaio/lib -L/home/grant.meadors/master/opt/lscsoft/lal/lib -L/home/grant.meadors/master/opt/lscsoft/lalstochastic/lib -L/home/grant.meadors/master/opt/lscsoft/lalmetaio/lib -L/home/grant.meadors/master/opt/lscsoft/lal/lib
@@ -237,10 +246,10 @@ OTOOL64 =
 PACKAGE = lalapps
 PACKAGE_BUGREPORT = lal-discuss@ligo.org
 PACKAGE_NAME = lalapps
-PACKAGE_STRING = lalapps 6.13.1.1
+PACKAGE_STRING = lalapps 6.13.2.1
 PACKAGE_TARNAME = lalapps
 PACKAGE_URL = 
-PACKAGE_VERSION = 6.13.1.1
+PACKAGE_VERSION = 6.13.2.1
 PATH_SEPARATOR = :
 PKG_CONFIG = /usr/bin/pkg-config
 PKG_CONFIG_LIBDIR = 
@@ -258,7 +267,7 @@ SET_MAKE =
 SHELL = /bin/bash
 STRIP = strip
 SW_VERS = 
-VERSION = 6.13.1.1
+VERSION = 6.13.2.1
 abs_builddir = /home/grant.meadors/src/lscsoft/lalsuite/lalapps/src/pulsar/TwoSpect
 abs_srcdir = /home/grant.meadors/src/lscsoft/lalsuite/lalapps/src/pulsar/TwoSpect
 abs_top_builddir = /home/grant.meadors/src/lscsoft/lalsuite/lalapps
@@ -267,6 +276,7 @@ ac_ct_AR = ar
 ac_ct_CC = gcc
 ac_ct_CXX = 
 ac_ct_DUMPBIN = 
+ac_ct_F77 = 
 am__include = include
 am__leading_dot = .
 am__quote = 

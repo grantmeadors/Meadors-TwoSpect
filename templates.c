@@ -1428,11 +1428,11 @@ void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 f
 
       //Resize the output candidate vector if necessary
       if ((*output)->numofcandidates == (*output)->length-1) {
-        *output = resize_candidateVector(*output, 2*((*output)->length));
-        if (*output==NULL) {
-          fprintf(stderr,"%s: resize_candidateVector(%d) failed.\n", __func__, 2*((*output)->length));
-          XLAL_ERROR_VOID(XLAL_EFUNC);
-        }
+         *output = resize_candidateVector(*output, 2*((*output)->length));
+         if (*output==NULL) {
+            fprintf(stderr,"%s: resize_candidateVector(%d) failed.\n", __func__, 2*((*output)->length));
+            XLAL_ERROR_VOID(XLAL_EFUNC);
+         }
       }
 
       loadCandidateData(&((*output)->data[(*output)->numofcandidates]), trialf->data[ii], period, moddepth, 0.0, 0.0, R, h0, prob, proberrcode, 0.0);

@@ -41,7 +41,9 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/gnuscripts/vcsID.common
 subdir = src/pulsar/TwoSpect
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/gnuscripts/ax_mpi.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/gnuscripts/ax_blas.m4 \
+	$(top_srcdir)/gnuscripts/ax_lapack.m4 \
+	$(top_srcdir)/gnuscripts/ax_mpi.m4 \
 	$(top_srcdir)/gnuscripts/lalapps.m4 \
 	$(top_srcdir)/gnuscripts/lalsuite_build.m4 \
 	$(top_srcdir)/gnuscripts/lalsuite_gccflags.m4 \
@@ -127,7 +129,10 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BAMBI_CFLAGS = @BAMBI_CFLAGS@
+BAMBI_LIBS = @BAMBI_LIBS@
 BIBTEX = @BIBTEX@
+BLAS_LIBS = @BLAS_LIBS@
 BOINC_PREFIX = @BOINC_PREFIX@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -158,9 +163,12 @@ ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
+F77 = @F77@
+FFLAGS = @FFLAGS@
 FFTW3_CFLAGS = @FFTW3_CFLAGS@
 FFTW3_LIBS = @FFTW3_LIBS@
 FGREP = @FGREP@
+FLIBS = @FLIBS@
 FRAME_CFLAGS = @FRAME_CFLAGS@
 FRAME_LIBS = @FRAME_LIBS@
 GENERATE_VCS_INFO = @GENERATE_VCS_INFO@
@@ -207,6 +215,7 @@ LALXML_LIBS = @LALXML_LIBS@
 LAL_CFLAGS = @LAL_CFLAGS@
 LAL_DATADIR = @LAL_DATADIR@
 LAL_LIBS = @LAL_LIBS@
+LAPACK_LIBS = @LAPACK_LIBS@
 LATEX = @LATEX@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
@@ -267,6 +276,7 @@ ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
+ac_ct_F77 = @ac_ct_F77@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
