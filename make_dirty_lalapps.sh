@@ -21,7 +21,8 @@ cd ${LSCSOFT_SRCDIR}/lalsuite/lalapps
 #./00boot
 #./configure --prefix=${LALAPPS_PREFIX} --enable-condor --disable-gcc-flags --disable-debug
 #make -j3 install
-./configure --enable-condor
+./00boot
+./configure --prefix=${LALAPPS_PREFIX} --enable-condor
 make
 make install
 
