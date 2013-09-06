@@ -1,0 +1,538 @@
+From 9ab4abc3952e05d88950222ecbb0c784c8e5a7df Mon Sep 17 00:00:00 2001
+From: Evan Goetz <evan.goetz@ligo.org>
+Date: Fri, 3 May 2013 14:56:12 +0200
+Subject: [PATCH] Added sco x1 style search option
+
+---
+ lalapps/src/pulsar/TwoSpect/TwoSpect.c   |  83 +++++++-----------
+ lalapps/src/pulsar/TwoSpect/TwoSpect.ggo |   1 +
+ lalapps/src/pulsar/TwoSpect/cmdline.c    | 108 ++++++++++++++----------
+ lalapps/src/pulsar/TwoSpect/cmdline.h    |   3 +
+ lalapps/src/pulsar/TwoSpect/templates.c  | 140 +++++++++++++++++++++++++++++++
+ lalapps/src/pulsar/TwoSpect/templates.h  |   2 +
+ 6 files changed, 241 insertions(+), 96 deletions(-)
+
+diff --git a/lalapps/src/pulsar/TwoSpect/TwoSpect.c b/lalapps/src/pulsar/TwoSpect/TwoSpect.c
+index 3f544a1..a8be935 100644
+--- a/lalapps/src/pulsar/TwoSpect/TwoSpect.c
++++ b/lalapps/src/pulsar/TwoSpect/TwoSpect.c
+@@ -831,52 +831,11 @@ int main(int argc, char *argv[])
+          if (args_info.printData_given) fprintf(stderr, "numfbins=%d, maxbinshift=%d, numffts=%d, numfprbins=%d\n", ffdata->numfbins, inputParams->maxbinshift, ffdata->numffts, ffdata->numfprbins);
+          fprintf(stderr, "Testing template f=%f, P=%f, Df=%f\n", args_info.templateTestF_arg, args_info.templateTestP_arg, args_info.templateTestDf_arg);
+          fprintf(LOG, "Testing template f=%f, P=%f, Df=%f\n", args_info.templateTestF_arg, args_info.templateTestP_arg, args_info.templateTestDf_arg);
+-         loadCandidateData(&(exactCandidates1->data[0]), args_info.templateTestF_arg, args_info.templateTestP_arg, args_info.templateTestDf_arg, dopplerpos.Alpha, dopplerpos.Delta, 0.0, 0.0, 0.0, 0, 0.0);
+-
+-         //Allocate and make the template
+-         templateStruct *template = new_templateStruct(inputParams->maxtemplatelength);
+-         if (template==NULL) {
+-            fprintf(stderr,"%s: new_templateStruct(%d) failed.\n", __func__, inputParams->maxtemplatelength);
+-            XLAL_ERROR(XLAL_EFUNC); 
+-         }
+-         resetTemplateStruct(template);
+-         makeTemplate(template, exactCandidates1->data[0], inputParams, sftexist, secondFFTplan);
+-         if (xlalErrno!=0) {
+-            fprintf(stderr,"%s: makeTemplate() failed.\n", __func__);
+-            XLAL_ERROR(XLAL_EFUNC);
+-         }
+-
+-         //Print out data product if requested
+-         if (args_info.printData_given) {
+-            char w[1000];
+-            snprintf(w, 1000, "%s/%s", args_info.outdirectory_arg, "templatedata.dat");
+-            FILE *TEMPLATEDATA = fopen(w, "w");
+-            if (TEMPLATEDATA==NULL) {
+-               fprintf(stderr, "%s: fopen %s failed.\n", __func__, w);
+-               XLAL_ERROR(XLAL_EFUNC);
+-            }
+-            for (jj=0; jj<(INT4)template->templatedata->length; jj++) fprintf(TEMPLATEDATA, "%g %d %d %d\n", template->templatedata->data[jj], template->pixellocations->data[jj], template->firstfftfrequenciesofpixels->data[jj], template->secondfftfrequencies->data[jj]);
+-            fclose(TEMPLATEDATA);
+-         }
+ 
+-         //Calculate R from the template and the data
+-         REAL8 R = calculateR(ffdata->ffdata, template, aveNoise, aveTFnoisePerFbinRatio);
+-         if (XLAL_IS_REAL8_FAIL_NAN(R)) {
+-            fprintf(stderr,"%s: calculateR() failed.\n", __func__);
+-            XLAL_ERROR(XLAL_EFUNC);
+-         }
+-
+-         //Calculate FAP
+-         REAL8 prob = probR(template, aveNoise, aveTFnoisePerFbinRatio, R, inputParams, &proberrcode);
+-         if (XLAL_IS_REAL8_FAIL_NAN(prob)) {
+-            fprintf(stderr,"%s: probR() failed.\n", __func__);
+-            XLAL_ERROR(XLAL_EFUNC);
+-         }
+-
+-         //Estimate the h0 if R>0.0
+-         REAL8 h0 = 0.0;
+-         if ( R > 0.0 ) h0 = 2.7426*pow(R/(inputParams->Tcoh*inputParams->Tobs),0.25)/(sqrt(ffdata->tfnormalization)*pow(frac_tobs_complete*ffdata->ffnormalization/skypointffnormalization,0.25));
++         //Load template quantities into a test candidate
++         loadCandidateData(&(exactCandidates1->data[0]), args_info.templateTestF_arg, args_info.templateTestP_arg, args_info.templateTestDf_arg, dopplerpos.Alpha, dopplerpos.Delta, 0.0, 0.0, 0.0, 0, 0.0);
+ 
++         //Resize the output candidate vector if necessary
+          if (exactCandidates2->numofcandidates == exactCandidates2->length-1) {
+             exactCandidates2 = resize_candidateVector(exactCandidates2, 2*exactCandidates2->length);
+             if (exactCandidates2->data==NULL) {
+@@ -885,9 +844,17 @@ int main(int argc, char *argv[])
+             }
+          }
+ 
+-         loadCandidateData(&(exactCandidates2->data[exactCandidates2->numofcandidates]), args_info.templateTestF_arg, args_info.templateTestP_arg, args_info.templateTestDf_arg, dopplerpos.Alpha, dopplerpos.Delta, R, h0, prob, proberrcode, 0.0);
++         //Analyze the template stored in the test candidate
++         analyzeOneTemplate(&(exactCandidates2->data[exactCandidates2->numofcandidates]), &(exactCandidates1->data[0]), ffdata, aveNoise, aveTFnoisePerFbinRatio, inputParams, sftexist, secondFFTplan);
++         if (xlalErrno!=0) {
++            fprintf(stderr, "%s: analyzeOneTemplate() failed.\n", __func__);
++            XLAL_ERROR(XLAL_FAILURE);
++         }
+          exactCandidates2->numofcandidates++;
+ 
++         //Rescale the h0 output from the normaliztions and amount of observation time present
++         exactCandidates2->data[exactCandidates2->numofcandidates-1].h0 /= sqrt(ffdata->tfnormalization)*pow(frac_tobs_complete*ffdata->ffnormalization/skypointffnormalization,0.25);
++
+       } else if (args_info.templateTest_given && (!args_info.templateTestF_given || !args_info.templateTestP_given || !args_info.templateTestDf_given)) {
+          fprintf(stderr, "%s: the template test values must be given: --templateTestF, --templateTestP, and --templateTestDf\n", __func__);
+          XLAL_ERROR(XLAL_FAILURE);
+@@ -896,12 +863,24 @@ int main(int argc, char *argv[])
+          XLAL_ERROR(XLAL_FAILURE);
+       }
+ 
++      //If the user wants to do a template search, that is done here
++      if (args_info.templateSearch_given) {
++
++         templateSearch_scox1Style(&exactCandidates2, inputParams->fmin, inputParams->fspan, 68023.8259, 1.44, inputParams, ffdata->ffdata, sftexist, aveNoise,  aveTFnoisePerFbinRatio,  secondFFTplan, 1);
++         if (xlalErrno!=0) {
++            fprintf(stderr, "%s: templateSearch_scox1Style() failed.\n", __func__);
++            XLAL_ERROR(XLAL_EFUNC);
++         }
++         for (ii=0; ii<exactCandidates2->numofcandidates; ii++) exactCandidates2->data[ii].h0 /= sqrt(ffdata->tfnormalization)*pow(frac_tobs_complete*ffdata->ffnormalization/skypointffnormalization,0.25);
++
++      }
++
+       if (inputParams->signalOnly!=0) return 0;
+       
+ ////////Start of the IHS step!
+       candidateVector *ihsCandidates_reduced = NULL;
+       //Find the FAR of IHS sum -- only if the templateTest has not been given
+-      if (!args_info.templateTest_given) {
++      if (!args_info.templateTest_given && !args_info.templateSearch_given) {
+          if (ihsfarstruct->ihsfar->data[0]==0.0) {
+             fprintf(stderr, "Determining IHS FAR values... ");
+             fprintf(LOG, "Determining IHS FAR values... ");
+@@ -946,8 +925,8 @@ int main(int argc, char *argv[])
+ ////////End of the IHS step
+       
+ ////////Start of the Gaussian template search!
+-      //First check to see if the IHSonly or templateTest was given
+-      if (args_info.IHSonly_given && !args_info.templateTest_given) {
++      //First check to see if the IHSonly or templateTest or templateSearch was given
++      if (args_info.IHSonly_given && !args_info.templateTest_given && !args_info.templateSearch_given) {
+          //If we keep only the top X IHS candidates and the number of candidates is greater than X, we need to use the pruned list (ihsCandidates_reduced)
+          if (args_info.keepOnlyTopNumIHS_given && (INT4)ihsCandidates->numofcandidates > args_info.keepOnlyTopNumIHS_arg) {
+             //If the exactCandidates2 vector is not large enough for the number of new candidates to put in, we have to resize the vector
+@@ -988,7 +967,7 @@ int main(int argc, char *argv[])
+             
+          }
+          
+-      } else if (!args_info.templateTest_given && (!args_info.simpleBandRejection_given || (args_info.simpleBandRejection_given && secFFTsigma<args_info.simpleBandRejection_arg))) {
++      } else if (!args_info.templateTest_given && !args_info.templateSearch_given && (!args_info.simpleBandRejection_given || (args_info.simpleBandRejection_given && secFFTsigma<args_info.simpleBandRejection_arg))) {
+          
+          if (args_info.keepOnlyTopNumIHS_given && (INT4)ihsCandidates->numofcandidates>args_info.keepOnlyTopNumIHS_arg) {
+             //Test the IHS candidates against Gaussian templates in this function
+@@ -1008,9 +987,9 @@ int main(int argc, char *argv[])
+          fprintf(stderr,"Initial stage done with candidates = %d\n",gaussCandidates1->numofcandidates);
+          
+          for (ii=0; ii<(INT4)gaussCandidates1->numofcandidates; ii++) fprintf(stderr, "Candidate %d: f0=%g, P=%g, df=%g\n", ii, gaussCandidates1->data[ii].fsig, gaussCandidates1->data[ii].period, gaussCandidates1->data[ii].moddepth);
+-      } /* if IHSonly is not given && templateTest not given */
++      } /* if IHSonly is not given && templateTest not given and templateSearch not given*/
+       
+-      if (!args_info.templateTest_given && args_info.keepOnlyTopNumIHS_given && (INT4)ihsCandidates->numofcandidates>args_info.keepOnlyTopNumIHS_arg) free_candidateVector(ihsCandidates_reduced);
++      if (!args_info.templateTest_given && !args_info.templateSearch_given && args_info.keepOnlyTopNumIHS_given && (INT4)ihsCandidates->numofcandidates>args_info.keepOnlyTopNumIHS_arg) free_candidateVector(ihsCandidates_reduced);
+       
+ ////////End of the Gaussian template search
+ 
+@@ -1223,7 +1202,7 @@ int main(int argc, char *argv[])
+       } /* if gaussCandidates1->numofcandidates > 0 */
+       
+       //Determine upper limits, if the ULoff has not been set
+-      if (!args_info.ULoff_given && !args_info.templateTest_given) {
++      if (!args_info.ULoff_given && !args_info.templateTest_given && !args_info.templateSearch_given) {
+          upperlimits->data[upperlimits->length-1].alpha = (REAL4)dopplerpos.Alpha;
+          upperlimits->data[upperlimits->length-1].delta = (REAL4)dopplerpos.Delta;
+          upperlimits->data[upperlimits->length-1].normalization = ffdata->tfnormalization;
+diff --git a/lalapps/src/pulsar/TwoSpect/TwoSpect.ggo b/lalapps/src/pulsar/TwoSpect/TwoSpect.ggo
+index 5834856..6d085ac 100755
+--- a/lalapps/src/pulsar/TwoSpect/TwoSpect.ggo
++++ b/lalapps/src/pulsar/TwoSpect/TwoSpect.ggo
+@@ -39,6 +39,7 @@ option "skyRegion"      - "Region of the sky to search (e.g. (ra1,dec1),(ra2,dec
+ option "skyRegionFile"  - "File with the grid points" string typestr="filename" optional
+ option "linPolAngle"    - "Polarization angle to search using linear polarization (when unspecified default is circular polarization" double optional
+ option "harmonicNumToSearch"  - "Number of harmonics of the Pmin to Pmax range to search" int default="1" optional
++option "templateSearch" - "Flag for doing a pure template-based search on search region specified by (sky,f,fspan,Pmin,Pmax,dfmin,dfmax)" flag off
+ 
+ section "TwoSpect threshold settings"
+ option "ihsfactor" - "Number of harmonics to sum in IHS algorithm" int default="5" optional
+diff --git a/lalapps/src/pulsar/TwoSpect/cmdline.c b/lalapps/src/pulsar/TwoSpect/cmdline.c
+index 2251098..5617ee2 100644
+--- a/lalapps/src/pulsar/TwoSpect/cmdline.c
++++ b/lalapps/src/pulsar/TwoSpect/cmdline.c
+@@ -67,6 +67,7 @@ const char *gengetopt_args_info_full_help[] = {
+   "      --skyRegionFile=filename  File with the grid points",
+   "      --linPolAngle=DOUBLE      Polarization angle to search using linear \n                                  polarization (when unspecified default is \n                                  circular polarization",
+   "      --harmonicNumToSearch=INT Number of harmonics of the Pmin to Pmax range \n                                  to search  (default=`1')",
++  "      --templateSearch          Flag for doing a pure template-based search on \n                                  search region specified by \n                                  (sky,f,fspan,Pmin,Pmax,dfmin,dfmax)  \n                                  (default=off)",
+   "\nTwoSpect threshold settings:",
+   "      --ihsfactor=INT           Number of harmonics to sum in IHS algorithm  \n                                  (default=`5')",
+   "      --ihsfar=DOUBLE           IHS FAR threshold",
+@@ -179,11 +180,12 @@ init_help_array(void)
+   gengetopt_args_info_help[56] = gengetopt_args_info_full_help[56];
+   gengetopt_args_info_help[57] = gengetopt_args_info_full_help[57];
+   gengetopt_args_info_help[58] = gengetopt_args_info_full_help[58];
+-  gengetopt_args_info_help[59] = 0; 
++  gengetopt_args_info_help[59] = gengetopt_args_info_full_help[59];
++  gengetopt_args_info_help[60] = 0; 
+   
+ }
+ 
+-const char *gengetopt_args_info_help[60];
++const char *gengetopt_args_info_help[61];
+ 
+ typedef enum {ARG_NO
+   , ARG_FLAG
+@@ -271,6 +273,7 @@ void clear_given (struct gengetopt_args_info *args_info)
+   args_info->skyRegionFile_given = 0 ;
+   args_info->linPolAngle_given = 0 ;
+   args_info->harmonicNumToSearch_given = 0 ;
++  args_info->templateSearch_given = 0 ;
+   args_info->ihsfactor_given = 0 ;
+   args_info->ihsfar_given = 0 ;
+   args_info->ihsfom_given = 0 ;
+@@ -365,6 +368,7 @@ void clear_args (struct gengetopt_args_info *args_info)
+   args_info->linPolAngle_orig = NULL;
+   args_info->harmonicNumToSearch_arg = 1;
+   args_info->harmonicNumToSearch_orig = NULL;
++  args_info->templateSearch_flag = 0;
+   args_info->ihsfactor_arg = 5;
+   args_info->ihsfactor_orig = NULL;
+   args_info->ihsfar_orig = NULL;
+@@ -455,48 +459,49 @@ void init_args_info(struct gengetopt_args_info *args_info)
+   args_info->skyRegionFile_help = gengetopt_args_info_full_help[32] ;
+   args_info->linPolAngle_help = gengetopt_args_info_full_help[33] ;
+   args_info->harmonicNumToSearch_help = gengetopt_args_info_full_help[34] ;
+-  args_info->ihsfactor_help = gengetopt_args_info_full_help[36] ;
+-  args_info->ihsfar_help = gengetopt_args_info_full_help[37] ;
+-  args_info->ihsfom_help = gengetopt_args_info_full_help[38] ;
+-  args_info->ihsfomfar_help = gengetopt_args_info_full_help[39] ;
+-  args_info->keepOnlyTopNumIHS_help = gengetopt_args_info_full_help[40] ;
+-  args_info->tmplfar_help = gengetopt_args_info_full_help[41] ;
+-  args_info->minTemplateLength_help = gengetopt_args_info_full_help[42] ;
+-  args_info->maxTemplateLength_help = gengetopt_args_info_full_help[43] ;
+-  args_info->ULfmin_help = gengetopt_args_info_full_help[45] ;
+-  args_info->ULfspan_help = gengetopt_args_info_full_help[46] ;
+-  args_info->ULminimumDeltaf_help = gengetopt_args_info_full_help[47] ;
+-  args_info->ULmaximumDeltaf_help = gengetopt_args_info_full_help[48] ;
+-  args_info->allULvalsPerSkyLoc_help = gengetopt_args_info_full_help[49] ;
+-  args_info->markBadSFTs_help = gengetopt_args_info_full_help[51] ;
+-  args_info->simpleBandRejection_help = gengetopt_args_info_full_help[52] ;
+-  args_info->lineDetection_help = gengetopt_args_info_full_help[53] ;
+-  args_info->FFTplanFlag_help = gengetopt_args_info_full_help[55] ;
+-  args_info->fastchisqinv_help = gengetopt_args_info_full_help[56] ;
+-  args_info->useSSE_help = gengetopt_args_info_full_help[57] ;
+-  args_info->followUpOutsideULrange_help = gengetopt_args_info_full_help[58] ;
+-  args_info->signalOnly_help = gengetopt_args_info_full_help[60] ;
+-  args_info->templateTest_help = gengetopt_args_info_full_help[61] ;
+-  args_info->templateTestF_help = gengetopt_args_info_full_help[62] ;
+-  args_info->templateTestP_help = gengetopt_args_info_full_help[63] ;
+-  args_info->templateTestDf_help = gengetopt_args_info_full_help[64] ;
+-  args_info->ULsolver_help = gengetopt_args_info_full_help[65] ;
+-  args_info->dopplerMultiplier_help = gengetopt_args_info_full_help[66] ;
+-  args_info->IHSonly_help = gengetopt_args_info_full_help[67] ;
+-  args_info->noNotchHarmonics_help = gengetopt_args_info_full_help[68] ;
+-  args_info->calcRthreshold_help = gengetopt_args_info_full_help[69] ;
+-  args_info->BrentsMethod_help = gengetopt_args_info_full_help[70] ;
+-  args_info->antennaOff_help = gengetopt_args_info_full_help[71] ;
+-  args_info->noiseWeightOff_help = gengetopt_args_info_full_help[72] ;
+-  args_info->gaussTemplatesOnly_help = gengetopt_args_info_full_help[73] ;
+-  args_info->validateSSE_help = gengetopt_args_info_full_help[74] ;
+-  args_info->ULoff_help = gengetopt_args_info_full_help[75] ;
+-  args_info->printSFTtimes_help = gengetopt_args_info_full_help[76] ;
+-  args_info->printUsedSFTtimes_help = gengetopt_args_info_full_help[77] ;
+-  args_info->printData_help = gengetopt_args_info_full_help[78] ;
+-  args_info->printUninitialized_help = gengetopt_args_info_full_help[79] ;
+-  args_info->randSeed_help = gengetopt_args_info_full_help[80] ;
+-  args_info->chooseSeed_help = gengetopt_args_info_full_help[81] ;
++  args_info->templateSearch_help = gengetopt_args_info_full_help[35] ;
++  args_info->ihsfactor_help = gengetopt_args_info_full_help[37] ;
++  args_info->ihsfar_help = gengetopt_args_info_full_help[38] ;
++  args_info->ihsfom_help = gengetopt_args_info_full_help[39] ;
++  args_info->ihsfomfar_help = gengetopt_args_info_full_help[40] ;
++  args_info->keepOnlyTopNumIHS_help = gengetopt_args_info_full_help[41] ;
++  args_info->tmplfar_help = gengetopt_args_info_full_help[42] ;
++  args_info->minTemplateLength_help = gengetopt_args_info_full_help[43] ;
++  args_info->maxTemplateLength_help = gengetopt_args_info_full_help[44] ;
++  args_info->ULfmin_help = gengetopt_args_info_full_help[46] ;
++  args_info->ULfspan_help = gengetopt_args_info_full_help[47] ;
++  args_info->ULminimumDeltaf_help = gengetopt_args_info_full_help[48] ;
++  args_info->ULmaximumDeltaf_help = gengetopt_args_info_full_help[49] ;
++  args_info->allULvalsPerSkyLoc_help = gengetopt_args_info_full_help[50] ;
++  args_info->markBadSFTs_help = gengetopt_args_info_full_help[52] ;
++  args_info->simpleBandRejection_help = gengetopt_args_info_full_help[53] ;
++  args_info->lineDetection_help = gengetopt_args_info_full_help[54] ;
++  args_info->FFTplanFlag_help = gengetopt_args_info_full_help[56] ;
++  args_info->fastchisqinv_help = gengetopt_args_info_full_help[57] ;
++  args_info->useSSE_help = gengetopt_args_info_full_help[58] ;
++  args_info->followUpOutsideULrange_help = gengetopt_args_info_full_help[59] ;
++  args_info->signalOnly_help = gengetopt_args_info_full_help[61] ;
++  args_info->templateTest_help = gengetopt_args_info_full_help[62] ;
++  args_info->templateTestF_help = gengetopt_args_info_full_help[63] ;
++  args_info->templateTestP_help = gengetopt_args_info_full_help[64] ;
++  args_info->templateTestDf_help = gengetopt_args_info_full_help[65] ;
++  args_info->ULsolver_help = gengetopt_args_info_full_help[66] ;
++  args_info->dopplerMultiplier_help = gengetopt_args_info_full_help[67] ;
++  args_info->IHSonly_help = gengetopt_args_info_full_help[68] ;
++  args_info->noNotchHarmonics_help = gengetopt_args_info_full_help[69] ;
++  args_info->calcRthreshold_help = gengetopt_args_info_full_help[70] ;
++  args_info->BrentsMethod_help = gengetopt_args_info_full_help[71] ;
++  args_info->antennaOff_help = gengetopt_args_info_full_help[72] ;
++  args_info->noiseWeightOff_help = gengetopt_args_info_full_help[73] ;
++  args_info->gaussTemplatesOnly_help = gengetopt_args_info_full_help[74] ;
++  args_info->validateSSE_help = gengetopt_args_info_full_help[75] ;
++  args_info->ULoff_help = gengetopt_args_info_full_help[76] ;
++  args_info->printSFTtimes_help = gengetopt_args_info_full_help[77] ;
++  args_info->printUsedSFTtimes_help = gengetopt_args_info_full_help[78] ;
++  args_info->printData_help = gengetopt_args_info_full_help[79] ;
++  args_info->printUninitialized_help = gengetopt_args_info_full_help[80] ;
++  args_info->randSeed_help = gengetopt_args_info_full_help[81] ;
++  args_info->chooseSeed_help = gengetopt_args_info_full_help[82] ;
+   
+ }
+ 
+@@ -838,6 +843,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
+     write_into_file(outfile, "linPolAngle", args_info->linPolAngle_orig, 0);
+   if (args_info->harmonicNumToSearch_given)
+     write_into_file(outfile, "harmonicNumToSearch", args_info->harmonicNumToSearch_orig, 0);
++  if (args_info->templateSearch_given)
++    write_into_file(outfile, "templateSearch", 0, 0 );
+   if (args_info->ihsfactor_given)
+     write_into_file(outfile, "ihsfactor", args_info->ihsfactor_orig, 0);
+   if (args_info->ihsfar_given)
+@@ -1624,6 +1631,7 @@ cmdline_parser_internal (
+         { "skyRegionFile",	1, NULL, 0 },
+         { "linPolAngle",	1, NULL, 0 },
+         { "harmonicNumToSearch",	1, NULL, 0 },
++        { "templateSearch",	0, NULL, 0 },
+         { "ihsfactor",	1, NULL, 0 },
+         { "ihsfar",	1, NULL, 0 },
+         { "ihsfom",	1, NULL, 0 },
+@@ -2094,6 +2102,18 @@ cmdline_parser_internal (
+               goto failure;
+           
+           }
++          /* Flag for doing a pure template-based search on search region specified by (sky,f,fspan,Pmin,Pmax,dfmin,dfmax).  */
++          else if (strcmp (long_options[option_index].name, "templateSearch") == 0)
++          {
++          
++          
++            if (update_arg((void *)&(args_info->templateSearch_flag), 0, &(args_info->templateSearch_given),
++                &(local_args_info.templateSearch_given), optarg, 0, 0, ARG_FLAG,
++                check_ambiguity, override, 1, 0, "templateSearch", '-',
++                additional_error))
++              goto failure;
++          
++          }
+           /* Number of harmonics to sum in IHS algorithm.  */
+           else if (strcmp (long_options[option_index].name, "ihsfactor") == 0)
+           {
+diff --git a/lalapps/src/pulsar/TwoSpect/cmdline.h b/lalapps/src/pulsar/TwoSpect/cmdline.h
+index 6dcaf58..afa76ee 100644
+--- a/lalapps/src/pulsar/TwoSpect/cmdline.h
++++ b/lalapps/src/pulsar/TwoSpect/cmdline.h
+@@ -129,6 +129,8 @@ struct gengetopt_args_info
+   int harmonicNumToSearch_arg;	/**< @brief Number of harmonics of the Pmin to Pmax range to search (default='1').  */
+   char * harmonicNumToSearch_orig;	/**< @brief Number of harmonics of the Pmin to Pmax range to search original value given at command line.  */
+   const char *harmonicNumToSearch_help; /**< @brief Number of harmonics of the Pmin to Pmax range to search help description.  */
++  int templateSearch_flag;	/**< @brief Flag for doing a pure template-based search on search region specified by (sky,f,fspan,Pmin,Pmax,dfmin,dfmax) (default=off).  */
++  const char *templateSearch_help; /**< @brief Flag for doing a pure template-based search on search region specified by (sky,f,fspan,Pmin,Pmax,dfmin,dfmax) help description.  */
+   int ihsfactor_arg;	/**< @brief Number of harmonics to sum in IHS algorithm (default='5').  */
+   char * ihsfactor_orig;	/**< @brief Number of harmonics to sum in IHS algorithm original value given at command line.  */
+   const char *ihsfactor_help; /**< @brief Number of harmonics to sum in IHS algorithm help description.  */
+@@ -268,6 +270,7 @@ struct gengetopt_args_info
+   unsigned int skyRegionFile_given ;	/**< @brief Whether skyRegionFile was given.  */
+   unsigned int linPolAngle_given ;	/**< @brief Whether linPolAngle was given.  */
+   unsigned int harmonicNumToSearch_given ;	/**< @brief Whether harmonicNumToSearch was given.  */
++  unsigned int templateSearch_given ;	/**< @brief Whether templateSearch was given.  */
+   unsigned int ihsfactor_given ;	/**< @brief Whether ihsfactor was given.  */
+   unsigned int ihsfar_given ;	/**< @brief Whether ihsfar was given.  */
+   unsigned int ihsfom_given ;	/**< @brief Whether ihsfom was given.  */
+diff --git a/lalapps/src/pulsar/TwoSpect/templates.c b/lalapps/src/pulsar/TwoSpect/templates.c
+index 50cfb0b..78e3775 100644
+--- a/lalapps/src/pulsar/TwoSpect/templates.c
++++ b/lalapps/src/pulsar/TwoSpect/templates.c
+@@ -1144,6 +1144,60 @@ void makeTemplate(templateStruct *output, candidate input, inputParamsStruct *pa
+ }
+ 
+ 
++void analyzeOneTemplate(candidate *output, candidate *input, ffdataStruct *ffdata, REAL4Vector *aveNoise, REAL4Vector *aveTFnoisePerFbinRatio, inputParamsStruct *params, INT4Vector *sftexist, REAL4FFTPlan *plan)
++{
++
++   INT4 proberrcode = 0;
++
++   //Allocate and make the template
++   templateStruct *template = new_templateStruct(params->maxtemplatelength);
++   if (template==NULL) {
++      fprintf(stderr,"%s: new_templateStruct(%d) failed.\n", __func__, params->maxtemplatelength);
++      XLAL_ERROR_VOID(XLAL_EFUNC); 
++   }
++   resetTemplateStruct(template);
++   makeTemplate(template, *input, params, sftexist, plan);
++   if (xlalErrno!=0) {
++      fprintf(stderr,"%s: makeTemplate() failed.\n", __func__);
++      XLAL_ERROR_VOID(XLAL_EFUNC);
++   }
++
++   //Print out data product if requested
++   /* if (args_info.printData_given) {
++      char w[1000];
++      snprintf(w, 1000, "%s/%s", args_info.outdirectory_arg, "templatedata.dat");
++      FILE *TEMPLATEDATA = fopen(w, "w");
++      if (TEMPLATEDATA==NULL) {
++        fprintf(stderr, "%s: fopen %s failed.\n", __func__, w);
++        XLAL_ERROR(XLAL_EFUNC);
++     }
++     for (jj=0; jj<(INT4)template->templatedata->length; jj++) fprintf(TEMPLATEDATA, "%g %d %d %d\n", template->templatedata->data[jj], template->pixellocations->data[jj], template->firstfftfrequenciesofpixels->data[jj], template->secondfftfrequencies->data[jj]);
++     fclose(TEMPLATEDATA);
++     } */
++
++   //Calculate R from the template and the data
++   REAL8 R = calculateR(ffdata->ffdata, template, aveNoise, aveTFnoisePerFbinRatio);
++   if (XLAL_IS_REAL8_FAIL_NAN(R)) {
++      fprintf(stderr,"%s: calculateR() failed.\n", __func__);
++      XLAL_ERROR_VOID(XLAL_EFUNC);
++   }
++
++   //Calculate FAP
++   REAL8 prob = probR(template, aveNoise, aveTFnoisePerFbinRatio, R, params, &proberrcode);
++   if (XLAL_IS_REAL8_FAIL_NAN(prob)) {
++      fprintf(stderr,"%s: probR() failed.\n", __func__);
++      XLAL_ERROR_VOID(XLAL_EFUNC);
++   }
++
++   //Estimate the h0 if R>0.0
++   REAL8 h0 = 0.0;
++   if ( R > 0.0 ) h0 = 2.7426*pow(R/(params->Tcoh*params->Tobs),0.25);
++
++   loadCandidateData(output, input->fsig, input->period, input->moddepth, input->ra, input->dec, R, h0, prob, proberrcode, 1.0);
++
++}
++
++
+ //A brute force template search to find the most significant template around a candidate
+ void bruteForceTemplateSearch(candidate *output, candidate input, REAL8 fminimum, REAL8 fmaximum, INT4 numfsteps, INT4 numperiods, REAL8 dfmin, REAL8 dfmax, INT4 numdfsteps, inputParamsStruct *params, REAL4Vector *ffdata, INT4Vector *sftexist, REAL4Vector *aveNoise, REAL4Vector *aveTFnoisePerFbinRatio, REAL4FFTPlan *secondFFTplan, INT4 useExactTemplates)
+ {
+@@ -1307,6 +1361,92 @@ void bruteForceTemplateSearch(candidate *output, candidate input, REAL8 fminimum
+ }
+ 
+ 
++//A brute force template search in a region of parameter space
++/// Testing in progress
++void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 fspan, REAL8 period, REAL8 asini, inputParamsStruct *params, REAL4Vector *ffdata, INT4Vector *sftexist, REAL4Vector *aveNoise, REAL4Vector *aveTFnoisePerFbinRatio, REAL4FFTPlan *secondFFTplan, INT4 useExactTemplates)
++{
++   
++   INT4 ii;
++   REAL8Vector *trialf;
++   REAL8 fstepsize;
++   
++   //Set up parameters of signal frequency search
++   INT4 numfsteps = (INT4)round(2.0*fspan*params->Tcoh)+1;
++   trialf = XLALCreateREAL8Vector(numfsteps);
++   if (trialf==NULL) {
++      fprintf(stderr,"%s: XLALCreateREAL8Vector(%d) failed.\n", __func__, numfsteps);
++      XLAL_ERROR_VOID(XLAL_EFUNC);
++   }
++   fstepsize = fspan/(REAL8)(numfsteps-1);
++   for (ii=0; ii<numfsteps; ii++) trialf->data[ii] = fminimum + fstepsize*ii;
++   
++   //Now search over the frequencies
++   INT4 proberrcode = 0;
++   candidate cand;
++   templateStruct *template = new_templateStruct(params->maxtemplatelength);
++   if (template==NULL) {
++      fprintf(stderr,"%s: new_templateStruct(%d) failed.\n", __func__, params->maxtemplatelength);
++      XLAL_ERROR_VOID(XLAL_EFUNC); 
++   }
++   
++   //Search over frequency
++   for (ii=0; ii<(INT4)trialf->length; ii++) {
++      //Determine modulation depth
++      REAL8 moddepth = 0.8727*(trialf->data[ii]/1000.0)*(7200.0/period)*asini;
++
++      //load candidate
++      loadCandidateData(&cand, trialf->data[ii], period, moddepth, 0.0, 0.0, 0, 0, 0.0, 0, 0.0);
++
++      //Make the template
++      resetTemplateStruct(template);
++      if (useExactTemplates!=0) {
++         makeTemplate(template, cand, params, sftexist, secondFFTplan);
++         if (xlalErrno!=0) {
++            fprintf(stderr,"%s: makeTemplate() failed.\n", __func__);
++            XLAL_ERROR_VOID(XLAL_EFUNC);
++         }
++      } else {
++         makeTemplateGaussians(template, cand, params, (INT4)aveTFnoisePerFbinRatio->length, (INT4)aveNoise->length);
++         if (xlalErrno!=0) {
++            fprintf(stderr,"%s: makeTemplateGaussians() failed.\n", __func__);
++            XLAL_ERROR_VOID(XLAL_EFUNC);
++         }
++      }
++
++      REAL8 R = calculateR(ffdata, template, aveNoise, aveTFnoisePerFbinRatio);
++      if (XLAL_IS_REAL8_FAIL_NAN(R)) {
++        fprintf(stderr,"%s: calculateR() failed.\n", __func__);
++        XLAL_ERROR_VOID(XLAL_EFUNC);
++      }
++      REAL8 prob = probR(template, aveNoise, aveTFnoisePerFbinRatio, R, params, &proberrcode);
++      if (XLAL_IS_REAL8_FAIL_NAN(prob)) {
++         fprintf(stderr,"%s: probR() failed.\n", __func__);
++         XLAL_ERROR_VOID(XLAL_EFUNC);
++      }
++      REAL8 h0 = 0.0;
++      if ( R > 0.0 ) h0 = 2.7426*pow(R/(params->Tcoh*params->Tobs),0.25);
++
++      //Resize the output candidate vector if necessary
++      if ((*output)->numofcandidates == (*output)->length-1) {
++        *output = resize_candidateVector(*output, 2*((*output)->length));
++        if (*output==NULL) {
++          fprintf(stderr,"%s: resize_candidateVector(%d) failed.\n", __func__, 2*((*output)->length));
++          XLAL_ERROR_VOID(XLAL_EFUNC);
++        }
++      }
++
++      loadCandidateData(&((*output)->data[(*output)->numofcandidates]), trialf->data[ii], period, moddepth, 0.0, 0.0, R, h0, prob, proberrcode, 0.0);
++      (*output)->numofcandidates++;
++      
++   } /* for ii < trialf */
++   free_templateStruct(template);
++   template = NULL;
++   XLALDestroyREAL8Vector(trialf);
++   trialf = NULL;
++   
++}
++
++
+ //Untested "efficient" template search. Not ready for prime-time
+ void efficientTemplateSearch(candidate *output, candidate input, REAL8 fminimum, REAL8 fmaximum, REAL8 minfstep, INT4 numperiods, REAL8 dfmin, REAL8 dfmax, REAL8 minDfstep, inputParamsStruct *params, REAL4Vector *ffdata, INT4Vector *sftexist, REAL4Vector *aveNoise, REAL4Vector *aveTFnoisePerFbinRatio, REAL4FFTPlan *secondFFTplan, INT4 useExactTemplates)
+ {
+diff --git a/lalapps/src/pulsar/TwoSpect/templates.h b/lalapps/src/pulsar/TwoSpect/templates.h
+index b21f505..efffaf4 100644
+--- a/lalapps/src/pulsar/TwoSpect/templates.h
++++ b/lalapps/src/pulsar/TwoSpect/templates.h
+@@ -45,6 +45,8 @@ void free_templateStruct(templateStruct *nameoftemplate);
+ void makeTemplateGaussians(templateStruct *output, candidate input, inputParamsStruct *params, INT4 numfbins, INT4 numfprbins);
+ void makeTemplate(templateStruct *output, candidate intput, inputParamsStruct *params, INT4Vector *sftexist, REAL4FFTPlan *plan);
+ void insertionSort_template(templateStruct *output, REAL4 weight, INT4 pixelloc, INT4 firstfftfreq, INT4 secfftfreq);
++void analyzeOneTemplate(candidate *output, candidate *input, ffdataStruct *ffdata, REAL4Vector *aveNoise, REAL4Vector *aveTFnoisePerFbinRatio, inputParamsStruct *params, INT4Vector *sftexist, REAL4FFTPlan *plan);
++void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 fspan, REAL8 period, REAL8 asini, inputParamsStruct *params, REAL4Vector *ffdata, INT4Vector *sftexist, REAL4Vector *aveNoise, REAL4Vector *aveTFnoisePerFbinRatio, REAL4FFTPlan *secondFFTplan, INT4 useExactTemplates);
+ void bruteForceTemplateSearch(candidate *output, candidate input, REAL8 fmin, REAL8 fmax, INT4 numfsteps, INT4 numperiods, REAL8 dfmin, REAL8 dfmax, INT4 numdfsteps, inputParamsStruct *params, REAL4Vector *ffdata, INT4Vector *sftexist, REAL4Vector *aveNoise, REAL4Vector *aveTFnoisePerFbinRatio, REAL4FFTPlan *secondFFTplan, INT4 useExactTemplates);
+ void efficientTemplateSearch(candidate *output, candidate input, REAL8 fminimum, REAL8 fmaximum, REAL8 minfstep, INT4 numperiods, REAL8 dfmin, REAL8 dfmax, REAL8 minDfstep, inputParamsStruct *params, REAL4Vector *ffdata, INT4Vector *sftexist, REAL4Vector *aveNoise, REAL4Vector *aveTFnoisePerFbinRatio, REAL4FFTPlan *secondFFTplan, INT4 useExactTemplates);
+ 
+-- 
+1.8.2.3
+
