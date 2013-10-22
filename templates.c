@@ -1366,7 +1366,7 @@ void bruteForceTemplateSearch(candidate *output, candidate input, REAL8 fminimum
 void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 fspan, REAL8 period, REAL8 asini, inputParamsStruct *params, REAL4Vector *ffdata, INT4Vector *sftexist, REAL4Vector *aveNoise, REAL4Vector *aveTFnoisePerFbinRatio, REAL4FFTPlan *secondFFTplan, INT4 useExactTemplates)
 {
    
-   INT4 ii;
+   INT4 ii, jj;
    REAL8Vector *trialf;
    REAL8 fstepsize;
    

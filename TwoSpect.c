@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
    printf("Directed TwoSpect: development version\n \ 
        Work in progress \n \
        Not yet reviewed \n \
-       Test code as of 2013-09-06 \n \
+       Test code as of 2013-10-22 \n \
        Grant David Meadors, Evan Goetz and Keith Riles.\n");
    
    INT4 ii, jj;               //counter variables
