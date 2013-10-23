@@ -1363,12 +1363,14 @@ void bruteForceTemplateSearch(candidate *output, candidate input, REAL8 fminimum
 
 //A brute force template search in a region of parameter space
 /// Testing in progress
-void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 fspan, REAL8 period, REAL8 asini, inputParamsStruct *params, REAL4Vector *ffdata, INT4Vector *sftexist, REAL4Vector *aveNoise, REAL4Vector *aveTFnoisePerFbinRatio, REAL4FFTPlan *secondFFTplan, INT4 useExactTemplates)
+void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 fspan, REAL8 period, REAL8 asini, REAL8 asinisigma, inputParamsStruct *params, REAL4Vector *ffdata, INT4Vector *sftexist, REAL4Vector *aveNoise, REAL4Vector *aveTFnoisePerFbinRatio, REAL4FFTPlan *secondFFTplan, INT4 useExactTemplates)
 {
    
    INT4 ii, jj;
    REAL8Vector *trialf;
+   REAL8Vector *trialdf;
    REAL8 fstepsize;
+   REAL8 dfstepsize;
    
    //Set up parameters of signal frequency search
    INT4 numfsteps = (INT4)round(2.0*fspan*params->Tcoh)+1;
@@ -1379,6 +1381,23 @@ void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 f
    }
    fstepsize = fspan/(REAL8)(numfsteps-1);
    for (ii=0; ii<numfsteps; ii++) trialf->data[ii] = fminimum + fstepsize*ii;
+
+   //Set up parameters of signal modulation depth search
+   /* Modulation depth is 2*pi*f*asini*period, or rearranged
+   0.8727*(f/1000.0)*(7200.0/period)*asini
+   Assuming sigma = 0.18 uncertainty in an asini of 1.44 for
+   Scorpius X-1 and giving +/- 3*sigma leeway, the conservative 
+   number of df steps should cover
+   0.8727*(fmax/1000.0)*(7200.0/period)*6*0.18 
+   with, as empirical testing has found necessary, a spacing of
+   4*Tcoh */
+   /* While this initialization could be moved inside the loop
+   that searches over frequency, it is slightly faster not to have to 
+   recalculate these variables every time,
+   and it gives us a bit of extra data*/
+   REAL8 moddepthspan = 0.8727*(trialf->data[numfsteps-1]/1000.0)*(7200.0/period)*6*asinisigma;
+   INT4 numdfsteps = (INT4)round(4.0*moddepthspan*params->Tcoh) + 1;
+   printf("Number of modulation depth steps: %s \n", numdfsteps);
    
    //Now search over the frequencies
    INT4 proberrcode = 0;
