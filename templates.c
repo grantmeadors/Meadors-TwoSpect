@@ -1396,10 +1396,19 @@ void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 f
    recalculate these variables every time,
    and it gives us a bit of extra data*/
    REAL8 asinisigma = 0.18;
+   REAL8 moddepth = 0.8727*(trialf->data[ii]/1000.0)*(7200.0/period)*asini;
+   REAL8 moddepthmin = moddepth - 3*asinisigma;
    REAL8 moddepthspan = 0.8727*(trialf->data[numfsteps-1]/1000.0)*(7200.0/period)*6*asinisigma;
    printf("intended moddepthspan: %f \n", moddepthspan);
    INT4 numdfsteps = (INT4)round(4.0*moddepthspan*params->Tcoh) + 1;
    printf("intended numdfsteps: %d \n", numdfsteps);
+   trialdf = XLALCreateREAL8Vector(numdfsteps);
+   if (trialdf==NULL) {
+      fprintf(stderr,"%s: XLALCreateREAL8Vector(%d) failed.\n", __func__, numdfsteps);
+      XLAL_ERROR_VOID(XLAL_EFUNC); 
+   };
+   dfstepsize = moddepthspan/(REAL8)(numdfsteps-1);
+   for (jj=0; jj<numdfsteps; jj++) trialdf->data[jj] = moddepthmin + dfstepsize*jj; 
    //INT4 numdfsteps = (INT4)round(4.0*moddepthspan*params->Tcoh) + 1;
    
    //Now search over the frequencies
@@ -1413,8 +1422,9 @@ void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 f
    
    //Search over frequency
    for (ii=0; ii<(INT4)trialf->length; ii++) {
+   for (jj=0; jj<(INT4)trialdf->length; jj++) {
       //Determine modulation depth
-      REAL8 moddepth = 0.8727*(trialf->data[ii]/1000.0)*(7200.0/period)*asini;
+      //REAL8 moddepth = 0.8727*(trialf->data[ii]/1000.0)*(7200.0/period)*asini;
 
       //load candidate
       loadCandidateData(&cand, trialf->data[ii], period, moddepth, 0.0, 0.0, 0, 0, 0.0, 0, 0.0);
@@ -1459,12 +1469,14 @@ void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 f
 
       loadCandidateData(&((*output)->data[(*output)->numofcandidates]), trialf->data[ii], period, moddepth, 0.0, 0.0, R, h0, prob, proberrcode, 0.0);
       (*output)->numofcandidates++;
-      
+   } /* for jj < trialdf */   
    } /* for ii < trialf */
    free_templateStruct(template);
    template = NULL;
    XLALDestroyREAL8Vector(trialf);
+   XLALDestroyREAL8Vector(trialdf);
    trialf = NULL;
+   trialdf = NULL;
    
 }
 
