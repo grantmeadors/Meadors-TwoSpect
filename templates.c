@@ -1363,7 +1363,7 @@ void bruteForceTemplateSearch(candidate *output, candidate input, REAL8 fminimum
 
 //A brute force template search in a region of parameter space
 /// Testing in progress
-void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 fspan, REAL8 period, REAL8 asini, inputParamsStruct *params, REAL4Vector *ffdata, INT4Vector *sftexist, REAL4Vector *aveNoise, REAL4Vector *aveTFnoisePerFbinRatio, REAL4FFTPlan *secondFFTplan, INT4 useExactTemplates)
+void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 fspan, REAL8 period, REAL8 asini, REAL8 asinisigma, inputParamsStruct *params, REAL4Vector *ffdata, INT4Vector *sftexist, REAL4Vector *aveNoise, REAL4Vector *aveTFnoisePerFbinRatio, REAL4FFTPlan *secondFFTplan, INT4 useExactTemplates)
 {
    
    INT4 ii, jj;
@@ -1382,35 +1382,6 @@ void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 f
    fstepsize = fspan/(REAL8)(numfsteps-1);
    for (ii=0; ii<numfsteps; ii++) trialf->data[ii] = fminimum + fstepsize*ii;
 
-   //Set up parameters of signal modulation depth search
-   /* Modulation depth is 2*pi*f*asini*period, or rearranged
-   0.8727*(f/1000.0)*(7200.0/period)*asini
-   Assuming sigma = 0.18 uncertainty in an asini of 1.44 for
-   Scorpius X-1 and giving +/- 3*sigma leeway, the conservative 
-   number of df steps should cover
-   0.8727*(fmax/1000.0)*(7200.0/period)*6*0.18 
-   with, as empirical testing has found necessary, a spacing of
-   4*Tcoh */
-   /* While this initialization could be moved inside the loop
-   that searches over frequency, it is slightly faster not to have to 
-   recalculate these variables every time,
-   and it gives us a bit of extra data*/
-   REAL8 asinisigma = 0.18;
-   REAL8 moddepth = 0.8727*(trialf->data[ii]/1000.0)*(7200.0/period)*asini;
-   REAL8 moddepthmin = moddepth - 3*asinisigma;
-   REAL8 moddepthspan = 0.8727*(trialf->data[numfsteps-1]/1000.0)*(7200.0/period)*6*asinisigma;
-   printf("intended moddepthspan: %f \n", moddepthspan);
-   INT4 numdfsteps = (INT4)round(4.0*moddepthspan*params->Tcoh) + 1;
-   printf("intended numdfsteps: %d \n", numdfsteps);
-   trialdf = XLALCreateREAL8Vector(numdfsteps);
-   if (trialdf==NULL) {
-      fprintf(stderr,"%s: XLALCreateREAL8Vector(%d) failed.\n", __func__, numdfsteps);
-      XLAL_ERROR_VOID(XLAL_EFUNC); 
-   };
-   dfstepsize = moddepthspan/(REAL8)(numdfsteps-1);
-   for (jj=0; jj<numdfsteps; jj++) trialdf->data[jj] = moddepthmin + dfstepsize*jj; 
-   //INT4 numdfsteps = (INT4)round(4.0*moddepthspan*params->Tcoh) + 1;
-   
    //Now search over the frequencies
    INT4 proberrcode = 0;
    candidate cand;
@@ -1422,11 +1393,46 @@ void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 f
    
    //Search over frequency
    for (ii=0; ii<(INT4)trialf->length; ii++) {
+
+       //Set up parameters of signal modulation depth search
+       /* Modulation depth is 2*pi*f*asini*period, or rearranged
+       0.8727*(f/1000.0)*(7200.0/period)*asini
+       Assuming sigma = 0.18 uncertainty in an asini of 1.44 for
+       Scorpius X-1 and giving +/- 3*sigma leeway, the conservative 
+       number of df steps should cover
+       0.8727*(fmax/1000.0)*(7200.0/period)*6*0.18 
+       with, as empirical testing has found necessary, a spacing of
+       4*Tcoh */
+       /* While this initialization could be moved inside the loop
+       that searches over frequency, it is slightly faster not to have to 
+       recalculate these variables every time,
+       and it gives us a bit of extra data*/
+       //REAL8 asinisigma = 0.18;
+       REAL8 moddepth = 0.8727*(trialf->data[ii]/1000.0)*(7200.0/period)*asini;
+       printf("Making the first computation involving asinisigma, for moddepthmin\n");
+       REAL8 moddepthmin = moddepth - 3*asinisigma;
+       printf("Done with moddepthmin, making moddepthspan\n");
+       REAL8 moddepthspan = 0.8727*(trialf->data[numfsteps-1]/1000.0)*(7200.0/period)*6*asinisigma;
+       printf("intended moddepthspan: %f \n", moddepthspan);
+       INT4 numdfsteps = (INT4)round(4.0*moddepthspan*params->Tcoh) + 1;
+       //INT4 numdfsteps = (INT4)round(4.0*moddepthspan*params->Tcoh) + 1;
+       printf("intended numdfsteps: %d \n", numdfsteps);
+       trialdf = XLALCreateREAL8Vector(numdfsteps);
+       if (trialdf==NULL) {
+          fprintf(stderr,"%s: XLALCreateREAL8Vector(%d) failed.\n", __func__, numdfsteps);
+          XLAL_ERROR_VOID(XLAL_EFUNC); 
+       };
+       dfstepsize = moddepthspan/(REAL8)(numdfsteps-1);
+       for (jj=0; jj<numdfsteps; jj++) trialdf->data[jj] = moddepthmin + dfstepsize*jj; 
+   
+
+
      for (jj=0; jj<(INT4)trialdf->length; jj++) {
         //Determine modulation depth
         //REAL8 moddepth = 0.8727*(trialf->data[ii]/1000.0)*(7200.0/period)*asini;
 
         //load candidate
+        //printf("Loading candidate. Remember to get the RA and dec from outside in production run\n");
         loadCandidateData(&cand, trialf->data[ii], period, trialdf->data[jj], 0.0, 0.0, 0, 0, 0.0, 0, 0.0);
 
         //Make the template
@@ -1467,16 +1473,16 @@ void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 f
            }
         }
 
-        loadCandidateData(&((*output)->data[(*output)->numofcandidates]), trialf->data[ii], period, moddepth, 0.0, 0.0, R, h0, prob, proberrcode, 0.0);
+        loadCandidateData(&((*output)->data[(*output)->numofcandidates]), trialf->data[ii], period, trialdf->data[jj], 0.0, 0.0, R, h0, prob, proberrcode, 0.0);
         (*output)->numofcandidates++;
      } /* for jj < trialdf */   
+     XLALDestroyREAL8Vector(trialdf);
+     trialdf = NULL;
    } /* for ii < trialf */
    free_templateStruct(template);
    template = NULL;
    XLALDestroyREAL8Vector(trialf);
-   XLALDestroyREAL8Vector(trialdf);
    trialf = NULL;
-   trialdf = NULL;
    
 }
 
