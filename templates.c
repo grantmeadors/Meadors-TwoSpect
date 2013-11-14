@@ -1363,7 +1363,7 @@ void bruteForceTemplateSearch(candidate *output, candidate input, REAL8 fminimum
 
 //A brute force template search in a region of parameter space
 /// Testing in progress
-void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 fspan, REAL8 period, REAL8 asini, REAL8 asinisigma, inputParamsStruct *params, REAL4Vector *ffdata, INT4Vector *sftexist, REAL4Vector *aveNoise, REAL4Vector *aveTFnoisePerFbinRatio, REAL4FFTPlan *secondFFTplan, INT4 useExactTemplates)
+void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 fspan, REAL8 period, REAL8 asini, inputParamsStruct *params, REAL4Vector *ffdata, INT4Vector *sftexist, REAL4Vector *aveNoise, REAL4Vector *aveTFnoisePerFbinRatio, REAL4FFTPlan *secondFFTplan, INT4 useExactTemplates)
 {
    
    INT4 ii, jj;
@@ -1395,9 +1395,12 @@ void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 f
    that searches over frequency, it is slightly faster not to have to 
    recalculate these variables every time,
    and it gives us a bit of extra data*/
+   REAL8 asinisigma = 0.18;
    REAL8 moddepthspan = 0.8727*(trialf->data[numfsteps-1]/1000.0)*(7200.0/period)*6*asinisigma;
+   printf("intended moddepthspan: %f \n", moddepthspan);
    INT4 numdfsteps = (INT4)round(4.0*moddepthspan*params->Tcoh) + 1;
-   printf("Number of modulation depth steps: %s \n", numdfsteps);
+   printf("intended numdfsteps: %d \n", numdfsteps);
+   //INT4 numdfsteps = (INT4)round(4.0*moddepthspan*params->Tcoh) + 1;
    
    //Now search over the frequencies
    INT4 proberrcode = 0;

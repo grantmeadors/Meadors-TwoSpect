@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
    printf("Directed TwoSpect: development version\n \ 
        Work in progress \n \
        Not yet reviewed \n \
-       Test code as of 2013-10-22 \n \
+       Test code as of 2014-11-14 \n \
        Grant David Meadors, Evan Goetz and Keith Riles.\n");
    
    INT4 ii, jj;               //counter variables
@@ -977,7 +977,7 @@ int main(int argc, char *argv[])
       //If the user wants to do a template search, that is done here
       if (args_info.templateSearch_given) {
 
-         templateSearch_scox1Style(&exactCandidates2, inputParams->fmin, inputParams->fspan, 68023.8259, 1.44, 0.18, inputParams, ffdata->ffdata, sftexist, aveNoise,  aveTFnoisePerFbinRatio,  secondFFTplan, 1);
+         templateSearch_scox1Style(&exactCandidates2, inputParams->fmin, inputParams->fspan, 68023.8259, 1.44, inputParams, ffdata->ffdata, sftexist, aveNoise,  aveTFnoisePerFbinRatio,  secondFFTplan, 1);
          if (xlalErrno!=0) {
             fprintf(stderr, "%s: templateSearch_scox1Style() failed.\n", __func__);
             XLAL_ERROR(XLAL_EFUNC);
