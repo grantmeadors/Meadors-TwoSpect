@@ -1363,7 +1363,7 @@ void bruteForceTemplateSearch(candidate *output, candidate input, REAL8 fminimum
 
 //A brute force template search in a region of parameter space
 /// Testing in progress
-void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 fspan, REAL8 period, REAL8 asini, REAL8 asinisigma, inputParamsStruct *params, REAL4Vector *ffdata, INT4Vector *sftexist, REAL4Vector *aveNoise, REAL4Vector *aveTFnoisePerFbinRatio, REAL4FFTPlan *secondFFTplan, INT4 useExactTemplates)
+void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 fspan, REAL8 period, REAL8 asini, REAL8 asinisigma, REAL4 ra, REAL4 dec, inputParamsStruct *params, REAL4Vector *ffdata, INT4Vector *sftexist, REAL4Vector *aveNoise, REAL4Vector *aveTFnoisePerFbinRatio, REAL4FFTPlan *secondFFTplan, INT4 useExactTemplates)
 {
    
    INT4 ii, jj;
@@ -1410,10 +1410,11 @@ void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 f
        //REAL8 asinisigma = 0.18;
        REAL8 moddepth = 0.8727*(trialf->data[ii]/1000.0)*(7200.0/period)*asini;
        printf("Making the first computation involving asinisigma, for moddepthmin\n");
-       REAL8 moddepthmin = moddepth - 3*asinisigma;
-       printf("Done with moddepthmin, making moddepthspan\n");
        REAL8 moddepthspan = 0.8727*(trialf->data[numfsteps-1]/1000.0)*(7200.0/period)*6*asinisigma;
        printf("intended moddepthspan: %f \n", moddepthspan);
+       //printf("Done with moddepthspan, making moddepthmin\n");
+       REAL8 moddepthmin = moddepth - 0.5*moddepthspan;
+       printf("intended moddepthmin: %f \n", moddepthmin);
        INT4 numdfsteps = (INT4)round(4.0*moddepthspan*params->Tcoh) + 1;
        //INT4 numdfsteps = (INT4)round(4.0*moddepthspan*params->Tcoh) + 1;
        printf("intended numdfsteps: %d \n", numdfsteps);
@@ -1433,7 +1434,7 @@ void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 f
 
         //load candidate
         //printf("Loading candidate. Remember to get the RA and dec from outside in production run\n");
-        loadCandidateData(&cand, trialf->data[ii], period, trialdf->data[jj], 0.0, 0.0, 0, 0, 0.0, 0, 0.0);
+        loadCandidateData(&cand, trialf->data[ii], period, trialdf->data[jj], ra, dec, 0, 0, 0.0, 0, 0.0);
 
         //Make the template
         resetTemplateStruct(template);
@@ -1473,7 +1474,7 @@ void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 f
            }
         }
 
-        loadCandidateData(&((*output)->data[(*output)->numofcandidates]), trialf->data[ii], period, trialdf->data[jj], 0.0, 0.0, R, h0, prob, proberrcode, 0.0);
+        loadCandidateData(&((*output)->data[(*output)->numofcandidates]), trialf->data[ii], period, trialdf->data[jj], ra, dec, R, h0, prob, proberrcode, 0.0);
         (*output)->numofcandidates++;
      } /* for jj < trialdf */   
      XLALDestroyREAL8Vector(trialdf);
