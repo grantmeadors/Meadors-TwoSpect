@@ -1422,54 +1422,54 @@ void templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 f
    
    //Search over frequency
    for (ii=0; ii<(INT4)trialf->length; ii++) {
-   for (jj=0; jj<(INT4)trialdf->length; jj++) {
-      //Determine modulation depth
-      //REAL8 moddepth = 0.8727*(trialf->data[ii]/1000.0)*(7200.0/period)*asini;
+     for (jj=0; jj<(INT4)trialdf->length; jj++) {
+        //Determine modulation depth
+        //REAL8 moddepth = 0.8727*(trialf->data[ii]/1000.0)*(7200.0/period)*asini;
 
-      //load candidate
-      loadCandidateData(&cand, trialf->data[ii], period, moddepth, 0.0, 0.0, 0, 0, 0.0, 0, 0.0);
+        //load candidate
+        loadCandidateData(&cand, trialf->data[ii], period, trialdf->data[jj], 0.0, 0.0, 0, 0, 0.0, 0, 0.0);
 
-      //Make the template
-      resetTemplateStruct(template);
-      if (useExactTemplates!=0) {
-         makeTemplate(template, cand, params, sftexist, secondFFTplan);
-         if (xlalErrno!=0) {
-            fprintf(stderr,"%s: makeTemplate() failed.\n", __func__);
-            XLAL_ERROR_VOID(XLAL_EFUNC);
-         }
-      } else {
-         makeTemplateGaussians(template, cand, params, (INT4)aveTFnoisePerFbinRatio->length, (INT4)aveNoise->length);
-         if (xlalErrno!=0) {
-            fprintf(stderr,"%s: makeTemplateGaussians() failed.\n", __func__);
-            XLAL_ERROR_VOID(XLAL_EFUNC);
-         }
-      }
+        //Make the template
+        resetTemplateStruct(template);
+        if (useExactTemplates!=0) {
+           makeTemplate(template, cand, params, sftexist, secondFFTplan);
+           if (xlalErrno!=0) {
+              fprintf(stderr,"%s: makeTemplate() failed.\n", __func__);
+              XLAL_ERROR_VOID(XLAL_EFUNC);
+           }
+        } else {
+           makeTemplateGaussians(template, cand, params, (INT4)aveTFnoisePerFbinRatio->length, (INT4)aveNoise->length);
+           if (xlalErrno!=0) {
+              fprintf(stderr,"%s: makeTemplateGaussians() failed.\n", __func__);
+              XLAL_ERROR_VOID(XLAL_EFUNC);
+           }
+        }
 
-      REAL8 R = calculateR(ffdata, template, aveNoise, aveTFnoisePerFbinRatio);
-      if (XLAL_IS_REAL8_FAIL_NAN(R)) {
-        fprintf(stderr,"%s: calculateR() failed.\n", __func__);
-        XLAL_ERROR_VOID(XLAL_EFUNC);
-      }
-      REAL8 prob = probR(template, aveNoise, aveTFnoisePerFbinRatio, R, params, &proberrcode);
-      if (XLAL_IS_REAL8_FAIL_NAN(prob)) {
-         fprintf(stderr,"%s: probR() failed.\n", __func__);
-         XLAL_ERROR_VOID(XLAL_EFUNC);
-      }
-      REAL8 h0 = 0.0;
-      if ( R > 0.0 ) h0 = 2.7426*pow(R/(params->Tcoh*params->Tobs),0.25);
+        REAL8 R = calculateR(ffdata, template, aveNoise, aveTFnoisePerFbinRatio);
+        if (XLAL_IS_REAL8_FAIL_NAN(R)) {
+          fprintf(stderr,"%s: calculateR() failed.\n", __func__);
+          XLAL_ERROR_VOID(XLAL_EFUNC);
+        }
+        REAL8 prob = probR(template, aveNoise, aveTFnoisePerFbinRatio, R, params, &proberrcode);
+        if (XLAL_IS_REAL8_FAIL_NAN(prob)) {
+           fprintf(stderr,"%s: probR() failed.\n", __func__);
+           XLAL_ERROR_VOID(XLAL_EFUNC);
+        }
+        REAL8 h0 = 0.0;
+        if ( R > 0.0 ) h0 = 2.7426*pow(R/(params->Tcoh*params->Tobs),0.25);
+  
+        //Resize the output candidate vector if necessary
+        if ((*output)->numofcandidates == (*output)->length-1) {
+           *output = resize_candidateVector(*output, 2*((*output)->length));
+           if (*output==NULL) {
+              fprintf(stderr,"%s: resize_candidateVector(%d) failed.\n", __func__, 2*((*output)->length));
+              XLAL_ERROR_VOID(XLAL_EFUNC);
+           }
+        }
 
-      //Resize the output candidate vector if necessary
-      if ((*output)->numofcandidates == (*output)->length-1) {
-         *output = resize_candidateVector(*output, 2*((*output)->length));
-         if (*output==NULL) {
-            fprintf(stderr,"%s: resize_candidateVector(%d) failed.\n", __func__, 2*((*output)->length));
-            XLAL_ERROR_VOID(XLAL_EFUNC);
-         }
-      }
-
-      loadCandidateData(&((*output)->data[(*output)->numofcandidates]), trialf->data[ii], period, moddepth, 0.0, 0.0, R, h0, prob, proberrcode, 0.0);
-      (*output)->numofcandidates++;
-   } /* for jj < trialdf */   
+        loadCandidateData(&((*output)->data[(*output)->numofcandidates]), trialf->data[ii], period, moddepth, 0.0, 0.0, R, h0, prob, proberrcode, 0.0);
+        (*output)->numofcandidates++;
+     } /* for jj < trialdf */   
    } /* for ii < trialf */
    free_templateStruct(template);
    template = NULL;
