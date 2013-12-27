@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
    printf("Directed TwoSpect: development version\n \ 
        Work in progress \n \
        Not yet reviewed \n \
-       Test code as of 2014-11-14 \n \
+       Test code as of 2013-12-27 \n \
        Grant David Meadors, Evan Goetz and Keith Riles.\n");
    
    INT4 ii, jj;               //counter variables
@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
    candidateVector *gaussCandidates3 = new_candidateVector(100);
    candidateVector *gaussCandidates4 = new_candidateVector(100);
    candidateVector *exactCandidates1 = new_candidateVector(100);   
-   candidateVector *exactCandidates2 = new_candidateVector(100);
+   candidateVector *exactCandidates2 = new_candidateVector(250000);
    candidateVector *ihsCandidates = new_candidateVector(100);
    UpperLimitVector *upperlimits = new_UpperLimitVector(1);
    if (gaussCandidates1==NULL) {
@@ -289,7 +289,7 @@ int main(int argc, char *argv[])
       fprintf(stderr, "%s: new_CandidateVector(%d) failed.\n", __func__, 100);
       XLAL_ERROR(XLAL_EFUNC);
    } else if (exactCandidates2==NULL) {
-      fprintf(stderr, "%s: new_CandidateVector(%d) failed.\n", __func__, 100);
+      fprintf(stderr, "%s: new_CandidateVector(%d) failed.\n", __func__, 250000);
       XLAL_ERROR(XLAL_EFUNC);
    } else if (ihsCandidates==NULL) {
       fprintf(stderr, "%s: new_CandidateVector(%d) failed.\n", __func__, 100);
