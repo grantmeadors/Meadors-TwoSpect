@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
    printf("Directed TwoSpect: development version\n\
        Work in progress \n\
        Not yet reviewed \n\
-       Test code as of 2014-01-30 \n\
+       Test code as of 2014-02-06 \n\
        Grant David Meadors, Evan Goetz and Keith Riles.\n");
    
    INT4 ii, jj;               //counter variables
@@ -1313,7 +1313,7 @@ int main(int argc, char *argv[])
       if (args_info.templateSearch_given) {
 
          printf("Calling templateSearch\n");
-         templateSearch_scox1Style(&exactCandidates2, inputParams->fmin, inputParams->fspan, 68023.8259, 1.44, 0.18, dopplerpos.Alpha, dopplerpos.Delta, inputParams, ffdata->ffdata, sftexist, aveNoise,  aveTFnoisePerFbinRatio,  secondFFTplan, 1);
+         templateSearch_scox1Style(&exactCandidates2, inputParams->fmin, inputParams->fspan, args_info.templateSearchP_arg, args_info.templateSearchAsini_arg, args_info.templateSearchAsiniSigma_arg, dopplerpos.Alpha, dopplerpos.Delta, inputParams, ffdata->ffdata, sftexist, aveNoise,  aveTFnoisePerFbinRatio,  secondFFTplan, 1);
          printf("Done calling templateSearch\n");
 
          if (xlalErrno!=0) {
@@ -3490,10 +3490,13 @@ INT4 readTwoSpectInputParams(inputParamsStruct *params, struct gengetopt_args_in
       fprintf(LOG,"WARNING! Adjusting input maximum period to 1/5 the observation time!\n");
       fprintf(stderr,"WARNING! Adjusting input maximum period to 1/5 the observation time!\n");
    }
-   if (params->Pmin < 2.0*3600) {
-      params->Pmin = 2.0*3600;
-      fprintf(LOG,"WARNING! Adjusting input minimum period to 2 hours!\n");
-      fprintf(stderr,"WARNING! Adjusting input minimum period to 2 hours!\n");
+   // 2 hour minimum period is too small for a search of J1751
+   // So we can do 2 minutes instead
+   // Commented out 2014-02-06 by Grant David Meadors
+   if (params->Pmin < 2.0*60) {
+      params->Pmin = 2.0*60;
+      fprintf(LOG,"WARNING! Adjusting input minimum period to 2 minutes!\n");
+      fprintf(stderr,"WARNING! Adjusting input minimum period to 2 minutes!\n");
    }
    if (params->dfmax > maxModDepth(params->Pmax, params->Tcoh)) {
       params->dfmax = floor(maxModDepth(params->Pmax, params->Tcoh)*(params->Tcoh))/(params->Tcoh);
