@@ -31,7 +31,7 @@ extern "C" {
 
 #ifndef CMDLINE_PARSER_VERSION
 /** @brief the program version */
-#define CMDLINE_PARSER_VERSION "1.1.31"
+#define CMDLINE_PARSER_VERSION "1.2.0"
 #endif
 
 /** @brief Where the command line options are stored */
@@ -43,9 +43,6 @@ struct gengetopt_args_info
   char * config_arg;	/**< @brief Configuration file in gengetopt format for passing parameters.  */
   char * config_orig;	/**< @brief Configuration file in gengetopt format for passing parameters original value given at command line.  */
   const char *config_help; /**< @brief Configuration file in gengetopt format for passing parameters help description.  */
-  int laldebug_arg;	/**< @brief LAL debug level (default='0').  */
-  char * laldebug_orig;	/**< @brief LAL debug level original value given at command line.  */
-  const char *laldebug_help; /**< @brief LAL debug level help description.  */
   double Tobs_arg;	/**< @brief Total observation time (in seconds).  */
   char * Tobs_orig;	/**< @brief Total observation time (in seconds) original value given at command line.  */
   const char *Tobs_help; /**< @brief Total observation time (in seconds) help description.  */
@@ -99,12 +96,12 @@ struct gengetopt_args_info
   char * sftFile_arg;	/**< @brief Path and filename of SFTs, e.g., /path/to/file/sftdata.sft (one of --sftDir/--timestampsFile).  */
   char * sftFile_orig;	/**< @brief Path and filename of SFTs, e.g., /path/to/file/sftdata.sft (one of --sftDir/--timestampsFile) original value given at command line.  */
   const char *sftFile_help; /**< @brief Path and filename of SFTs, e.g., /path/to/file/sftdata.sft (one of --sftDir/--timestampsFile) help description.  */
-  char * ephemDir_arg;	/**< @brief Path to ephemeris files, e.g. /path/to/ephemeris/files.  */
-  char * ephemDir_orig;	/**< @brief Path to ephemeris files, e.g. /path/to/ephemeris/files original value given at command line.  */
-  const char *ephemDir_help; /**< @brief Path to ephemeris files, e.g. /path/to/ephemeris/files help description.  */
-  char * ephemYear_arg;	/**< @brief Year or year range (e.g. 08-11) of ephemeris files.  */
-  char * ephemYear_orig;	/**< @brief Year or year range (e.g. 08-11) of ephemeris files original value given at command line.  */
-  const char *ephemYear_help; /**< @brief Year or year range (e.g. 08-11) of ephemeris files help description.  */
+  char * ephemEarth_arg;	/**< @brief Location of Earth ephemeris file (default='earth00-19-DE405.dat.gz').  */
+  char * ephemEarth_orig;	/**< @brief Location of Earth ephemeris file original value given at command line.  */
+  const char *ephemEarth_help; /**< @brief Location of Earth ephemeris file help description.  */
+  char * ephemSun_arg;	/**< @brief Location of Sun ephemeris file (default='sun00-19-DE405.dat.gz').  */
+  char * ephemSun_orig;	/**< @brief Location of Sun ephemeris file original value given at command line.  */
+  const char *ephemSun_help; /**< @brief Location of Sun ephemeris file help description.  */
   int gaussNoiseWithSFTgaps_flag;	/**< @brief Use the same gaps as SFTs that are read-in from either --sftDir or --sftFile options (one is required!), but create Gaussian noise with noise equal to --avesqrtSh (option conflicts with --timestampsFile) (default=off).  */
   const char *gaussNoiseWithSFTgaps_help; /**< @brief Use the same gaps as SFTs that are read-in from either --sftDir or --sftFile options (one is required!), but create Gaussian noise with noise equal to --avesqrtSh (option conflicts with --timestampsFile) help description.  */
   double Pmin_arg;	/**< @brief Minimum period to be searched (in seconds).  */
@@ -201,6 +198,8 @@ struct gengetopt_args_info
   const char *fastchisqinv_help; /**< @brief Use a faster central chi-sq inversion function (roughly float precision instead of double) help description.  */
   int useSSE_flag;	/**< @brief Use SSE functions (caution: user needs to have compiled for SSE or program fails) (default=off).  */
   const char *useSSE_help; /**< @brief Use SSE functions (caution: user needs to have compiled for SSE or program fails) help description.  */
+  int useAVX_flag;	/**< @brief Use AVX functions (caution: user needs to have compiled for AVX or program fails) (default=off).  */
+  const char *useAVX_help; /**< @brief Use AVX functions (caution: user needs to have compiled for AVX or program fails) help description.  */
   int followUpOutsideULrange_flag;	/**< @brief Follow up outliers outside the range of the UL values (default=off).  */
   const char *followUpOutsideULrange_help; /**< @brief Follow up outliers outside the range of the UL values help description.  */
   char * timestampsFile_arg;	/**< @brief File to read timestamps from (file-format: lines with <seconds> <nanoseconds>; conflicts with --sftDir/--sftFile and --segmentFile options).  */
@@ -264,6 +263,9 @@ struct gengetopt_args_info
   char * printSignalData_arg;	/**< @brief Print f0 and h0 per SFT of the signal, used only with --injectionSources option (default='./signal.dat').  */
   char * printSignalData_orig;	/**< @brief Print f0 and h0 per SFT of the signal, used only with --injectionSources option original value given at command line.  */
   const char *printSignalData_help; /**< @brief Print f0 and h0 per SFT of the signal, used only with --injectionSources option help description.  */
+  char * printMarginalizedSignalData_arg;	/**< @brief Print f0 and h0 per SFT of the signal, used only with --injectionSources option (default='./signal.dat').  */
+  char * printMarginalizedSignalData_orig;	/**< @brief Print f0 and h0 per SFT of the signal, used only with --injectionSources option original value given at command line.  */
+  const char *printMarginalizedSignalData_help; /**< @brief Print f0 and h0 per SFT of the signal, used only with --injectionSources option help description.  */
   int randSeed_arg;	/**< @brief Random seed value.  */
   char * randSeed_orig;	/**< @brief Random seed value original value given at command line.  */
   const char *randSeed_help; /**< @brief Random seed value help description.  */
@@ -274,7 +276,6 @@ struct gengetopt_args_info
   unsigned int full_help_given ;	/**< @brief Whether full-help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int config_given ;	/**< @brief Whether config was given.  */
-  unsigned int laldebug_given ;	/**< @brief Whether laldebug was given.  */
   unsigned int Tobs_given ;	/**< @brief Whether Tobs was given.  */
   unsigned int Tcoh_given ;	/**< @brief Whether Tcoh was given.  */
   unsigned int SFToverlap_given ;	/**< @brief Whether SFToverlap was given.  */
@@ -292,8 +293,8 @@ struct gengetopt_args_info
   unsigned int normRMSoutput_given ;	/**< @brief Whether normRMSoutput was given.  */
   unsigned int sftDir_given ;	/**< @brief Whether sftDir was given.  */
   unsigned int sftFile_given ;	/**< @brief Whether sftFile was given.  */
-  unsigned int ephemDir_given ;	/**< @brief Whether ephemDir was given.  */
-  unsigned int ephemYear_given ;	/**< @brief Whether ephemYear was given.  */
+  unsigned int ephemEarth_given ;	/**< @brief Whether ephemEarth was given.  */
+  unsigned int ephemSun_given ;	/**< @brief Whether ephemSun was given.  */
   unsigned int gaussNoiseWithSFTgaps_given ;	/**< @brief Whether gaussNoiseWithSFTgaps was given.  */
   unsigned int Pmin_given ;	/**< @brief Whether Pmin was given.  */
   unsigned int Pmax_given ;	/**< @brief Whether Pmax was given.  */
@@ -328,6 +329,7 @@ struct gengetopt_args_info
   unsigned int FFTplanFlag_given ;	/**< @brief Whether FFTplanFlag was given.  */
   unsigned int fastchisqinv_given ;	/**< @brief Whether fastchisqinv was given.  */
   unsigned int useSSE_given ;	/**< @brief Whether useSSE was given.  */
+  unsigned int useAVX_given ;	/**< @brief Whether useAVX was given.  */
   unsigned int followUpOutsideULrange_given ;	/**< @brief Whether followUpOutsideULrange was given.  */
   unsigned int timestampsFile_given ;	/**< @brief Whether timestampsFile was given.  */
   unsigned int segmentFile_given ;	/**< @brief Whether segmentFile was given.  */
@@ -354,6 +356,7 @@ struct gengetopt_args_info
   unsigned int printData_given ;	/**< @brief Whether printData was given.  */
   unsigned int printUninitialized_given ;	/**< @brief Whether printUninitialized was given.  */
   unsigned int printSignalData_given ;	/**< @brief Whether printSignalData was given.  */
+  unsigned int printMarginalizedSignalData_given ;	/**< @brief Whether printMarginalizedSignalData was given.  */
   unsigned int randSeed_given ;	/**< @brief Whether randSeed was given.  */
   unsigned int chooseSeed_given ;	/**< @brief Whether chooseSeed was given.  */
 

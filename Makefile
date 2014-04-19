@@ -36,7 +36,7 @@ build_triplet = x86_64-unknown-linux-gnu
 host_triplet = x86_64-unknown-linux-gnu
 bin_PROGRAMS = lalapps_TwoSpect$(EXEEXT)
 EXTRA_PROGRAMS = skygridsetup$(EXEEXT) compareCandidates$(EXEEXT) \
-	KSKtests$(EXEEXT)
+	testVectorMath$(EXEEXT)
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/gnuscripts/vcsID.common
 subdir = src/pulsar/TwoSpect
@@ -62,19 +62,14 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_KSKtests_OBJECTS = cmdline.$(OBJEXT) antenna.$(OBJEXT) \
-	KSKtests.$(OBJEXT)
-KSKtests_OBJECTS = $(am_KSKtests_OBJECTS)
-KSKtests_LDADD = $(LDADD)
-KSKtests_DEPENDENCIES = $(top_builddir)/src/lalapps/liblalapps.la
-AM_V_lt = $(am__v_lt_$(V))
-am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
-am__v_lt_0 = --silent
 am_compareCandidates_OBJECTS = compareCandidates.$(OBJEXT)
 compareCandidates_OBJECTS = $(am_compareCandidates_OBJECTS)
 compareCandidates_LDADD = $(LDADD)
 compareCandidates_DEPENDENCIES =  \
 	$(top_builddir)/src/lalapps/liblalapps.la
+AM_V_lt = $(am__v_lt_$(V))
+am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
+am__v_lt_0 = --silent
 am_lalapps_TwoSpect_OBJECTS = cmdline.$(OBJEXT) statistics.$(OBJEXT) \
 	fastchisqinv.$(OBJEXT) IHS.$(OBJEXT) candidates.$(OBJEXT) \
 	templates.$(OBJEXT) antenna.$(OBJEXT) vectormath.$(OBJEXT) \
@@ -88,6 +83,14 @@ am_skygridsetup_OBJECTS = skygridsetup.$(OBJEXT) \
 skygridsetup_OBJECTS = $(am_skygridsetup_OBJECTS)
 skygridsetup_LDADD = $(LDADD)
 skygridsetup_DEPENDENCIES = $(top_builddir)/src/lalapps/liblalapps.la
+am_testVectorMath_OBJECTS = testVectorMath.$(OBJEXT) \
+	vectormath.$(OBJEXT) templates.$(OBJEXT) candidates.$(OBJEXT) \
+	statistics.$(OBJEXT) fastchisqinv.$(OBJEXT) \
+	cdfwchisq.$(OBJEXT)
+testVectorMath_OBJECTS = $(am_testVectorMath_OBJECTS)
+testVectorMath_LDADD = $(LDADD)
+testVectorMath_DEPENDENCIES =  \
+	$(top_builddir)/src/lalapps/liblalapps.la
 DEFAULT_INCLUDES = -I. -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/gnuscripts/depcomp
 am__depfiles_maybe = depfiles
@@ -114,22 +117,23 @@ am__v_CCLD_0 = @echo "  CCLD  " $@;
 AM_V_GEN = $(am__v_GEN_$(V))
 am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
 am__v_GEN_0 = @echo "  GEN   " $@;
-SOURCES = $(KSKtests_SOURCES) $(compareCandidates_SOURCES) \
-	$(lalapps_TwoSpect_SOURCES) $(skygridsetup_SOURCES)
-DIST_SOURCES = $(KSKtests_SOURCES) $(compareCandidates_SOURCES) \
-	$(lalapps_TwoSpect_SOURCES) $(skygridsetup_SOURCES)
+SOURCES = $(compareCandidates_SOURCES) $(lalapps_TwoSpect_SOURCES) \
+	$(skygridsetup_SOURCES) $(testVectorMath_SOURCES)
+DIST_SOURCES = $(compareCandidates_SOURCES) \
+	$(lalapps_TwoSpect_SOURCES) $(skygridsetup_SOURCES) \
+	$(testVectorMath_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = ${SHELL} /usr1/gmeadors/src/lscsoft/lalsuite/lalapps/gnuscripts/missing --run aclocal-1.11
 AMTAR = ${SHELL} /usr1/gmeadors/src/lscsoft/lalsuite/lalapps/gnuscripts/missing --run tar
-AM_CFLAGS = -g -O2  -g3 -Wall -W -Werror -Wmissing-prototypes -Wstrict-prototypes -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -fno-common -Wnested-externs -Wno-format-zero-length -fno-strict-aliasing -Wno-unused-result  
-AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/lalapps -DPKG_DATA_DIR='"$(pkgdatadir)/"'   -I/home/gmeadors/master/opt/lscsoft/lalpulsar/include  -I/home/gmeadors/master/opt/lscsoft/lal/include  
-AM_CXXFLAGS =   
+AM_CFLAGS =  -g3 -Wall -W -Werror -Wmissing-prototypes -Wstrict-prototypes -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -fno-common -Wnested-externs -Wno-format-zero-length -fno-strict-aliasing -Wno-unused-result  -g -O2  
+AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/lalapps -DPKG_DATA_DIR='"$(pkgdatadir)/"'  -I/home/gmeadors/master/opt/lscsoft/lalpulsar/include  -I/home/gmeadors/master/opt/lscsoft/lal/include  
+AM_CXXFLAGS =  
 AM_DEFAULT_VERBOSITY = 0
-AM_FCFLAGS =   
-AM_FFLAGS =   
-AM_LDFLAGS =   -L/home/gmeadors/master/opt/lscsoft/lalpulsar/lib  -L/home/gmeadors/master/opt/lscsoft/lal/lib  
+AM_FCFLAGS =  
+AM_FFLAGS =  
+AM_LDFLAGS =  -L/home/gmeadors/master/opt/lscsoft/lalpulsar/lib  -L/home/gmeadors/master/opt/lscsoft/lal/lib  
 AR = ar
 AUTOCONF = ${SHELL} /usr1/gmeadors/src/lscsoft/lalsuite/lalapps/gnuscripts/missing --run autoconf
 AUTOHEADER = ${SHELL} /usr1/gmeadors/src/lscsoft/lalsuite/lalapps/gnuscripts/missing --run autoheader
@@ -280,7 +284,7 @@ build_cpu = x86_64
 build_os = linux-gnu
 build_vendor = unknown
 builddir = .
-configure_date = 2014-02-03T19:57:58-0800
+configure_date = 2014-04-19T14:06:46-0700
 datadir = ${datarootdir}
 datarootdir = ${prefix}/share
 docdir = ${datarootdir}/doc/${PACKAGE_TARNAME}
@@ -330,8 +334,9 @@ skygridsetup_SOURCES = helperprograms/skygridsetup.c helperprograms/cmdline_skyg
                        helperprograms/cmdline_skygridsetup.h antenna.h
 
 compareCandidates_SOURCES = helperprograms/compareCandidates.c
-KSKtests_SOURCES = cmdline.c antenna.c helperprograms/KSKtests.c \
-		   cmdline.h TwoSpectTypes.h antenna.h
+testVectorMath_SOURCES = helperprograms/testVectorMath.c vectormath.c templates.c candidates.c statistics.c \
+                         fastchisqinv.c cdfwchisq.c vectormath.h templates.h candidates.h statistics.h \
+                         fastchisqinv.h cdfwchisq.h
 
 BUILT_SOURCES = vcsID
 all: $(BUILT_SOURCES)
@@ -412,9 +417,6 @@ clean-binPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
-KSKtests$(EXEEXT): $(KSKtests_OBJECTS) $(KSKtests_DEPENDENCIES) 
-	@rm -f KSKtests$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(KSKtests_OBJECTS) $(KSKtests_LDADD) $(LIBS)
 compareCandidates$(EXEEXT): $(compareCandidates_OBJECTS) $(compareCandidates_DEPENDENCIES) 
 	@rm -f compareCandidates$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(compareCandidates_OBJECTS) $(compareCandidates_LDADD) $(LIBS)
@@ -424,6 +426,9 @@ lalapps_TwoSpect$(EXEEXT): $(lalapps_TwoSpect_OBJECTS) $(lalapps_TwoSpect_DEPEND
 skygridsetup$(EXEEXT): $(skygridsetup_OBJECTS) $(skygridsetup_DEPENDENCIES) 
 	@rm -f skygridsetup$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(skygridsetup_OBJECTS) $(skygridsetup_LDADD) $(LIBS)
+testVectorMath$(EXEEXT): $(testVectorMath_OBJECTS) $(testVectorMath_DEPENDENCIES) 
+	@rm -f testVectorMath$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(testVectorMath_OBJECTS) $(testVectorMath_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -432,7 +437,6 @@ distclean-compile:
 	-rm -f *.tab.c
 
 include ./$(DEPDIR)/IHS.Po
-include ./$(DEPDIR)/KSKtests.Po
 include ./$(DEPDIR)/TwoSpect.Po
 include ./$(DEPDIR)/antenna.Po
 include ./$(DEPDIR)/candidates.Po
@@ -444,6 +448,7 @@ include ./$(DEPDIR)/fastchisqinv.Po
 include ./$(DEPDIR)/skygridsetup.Po
 include ./$(DEPDIR)/statistics.Po
 include ./$(DEPDIR)/templates.Po
+include ./$(DEPDIR)/testVectorMath.Po
 include ./$(DEPDIR)/upperlimits.Po
 include ./$(DEPDIR)/vectormath.Po
 
@@ -470,22 +475,6 @@ include ./$(DEPDIR)/vectormath.Po
 #	source='$<' object='$@' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(LTCOMPILE) -c -o $@ $<
-
-KSKtests.o: helperprograms/KSKtests.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT KSKtests.o -MD -MP -MF $(DEPDIR)/KSKtests.Tpo -c -o KSKtests.o `test -f 'helperprograms/KSKtests.c' || echo '$(srcdir)/'`helperprograms/KSKtests.c
-	$(AM_V_at)$(am__mv) $(DEPDIR)/KSKtests.Tpo $(DEPDIR)/KSKtests.Po
-#	$(AM_V_CC) \
-#	source='helperprograms/KSKtests.c' object='KSKtests.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o KSKtests.o `test -f 'helperprograms/KSKtests.c' || echo '$(srcdir)/'`helperprograms/KSKtests.c
-
-KSKtests.obj: helperprograms/KSKtests.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT KSKtests.obj -MD -MP -MF $(DEPDIR)/KSKtests.Tpo -c -o KSKtests.obj `if test -f 'helperprograms/KSKtests.c'; then $(CYGPATH_W) 'helperprograms/KSKtests.c'; else $(CYGPATH_W) '$(srcdir)/helperprograms/KSKtests.c'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/KSKtests.Tpo $(DEPDIR)/KSKtests.Po
-#	$(AM_V_CC) \
-#	source='helperprograms/KSKtests.c' object='KSKtests.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o KSKtests.obj `if test -f 'helperprograms/KSKtests.c'; then $(CYGPATH_W) 'helperprograms/KSKtests.c'; else $(CYGPATH_W) '$(srcdir)/helperprograms/KSKtests.c'; fi`
 
 compareCandidates.o: helperprograms/compareCandidates.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT compareCandidates.o -MD -MP -MF $(DEPDIR)/compareCandidates.Tpo -c -o compareCandidates.o `test -f 'helperprograms/compareCandidates.c' || echo '$(srcdir)/'`helperprograms/compareCandidates.c
@@ -534,6 +523,22 @@ cmdline_skygridsetup.obj: helperprograms/cmdline_skygridsetup.c
 #	source='helperprograms/cmdline_skygridsetup.c' object='cmdline_skygridsetup.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o cmdline_skygridsetup.obj `if test -f 'helperprograms/cmdline_skygridsetup.c'; then $(CYGPATH_W) 'helperprograms/cmdline_skygridsetup.c'; else $(CYGPATH_W) '$(srcdir)/helperprograms/cmdline_skygridsetup.c'; fi`
+
+testVectorMath.o: helperprograms/testVectorMath.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT testVectorMath.o -MD -MP -MF $(DEPDIR)/testVectorMath.Tpo -c -o testVectorMath.o `test -f 'helperprograms/testVectorMath.c' || echo '$(srcdir)/'`helperprograms/testVectorMath.c
+	$(AM_V_at)$(am__mv) $(DEPDIR)/testVectorMath.Tpo $(DEPDIR)/testVectorMath.Po
+#	$(AM_V_CC) \
+#	source='helperprograms/testVectorMath.c' object='testVectorMath.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o testVectorMath.o `test -f 'helperprograms/testVectorMath.c' || echo '$(srcdir)/'`helperprograms/testVectorMath.c
+
+testVectorMath.obj: helperprograms/testVectorMath.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT testVectorMath.obj -MD -MP -MF $(DEPDIR)/testVectorMath.Tpo -c -o testVectorMath.obj `if test -f 'helperprograms/testVectorMath.c'; then $(CYGPATH_W) 'helperprograms/testVectorMath.c'; else $(CYGPATH_W) '$(srcdir)/helperprograms/testVectorMath.c'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/testVectorMath.Tpo $(DEPDIR)/testVectorMath.Po
+#	$(AM_V_CC) \
+#	source='helperprograms/testVectorMath.c' object='testVectorMath.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o testVectorMath.obj `if test -f 'helperprograms/testVectorMath.c'; then $(CYGPATH_W) 'helperprograms/testVectorMath.c'; else $(CYGPATH_W) '$(srcdir)/helperprograms/testVectorMath.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
