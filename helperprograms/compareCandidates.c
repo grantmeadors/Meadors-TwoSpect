@@ -150,8 +150,8 @@ INT4 main(void) {
 
    // Values of fdiff_allowed, dfdiff_allowed changed for ScoX1
    // tobs unchanged by Pdiff_allowed, the only affected result, is changed
-   double tobs = 40551300.0;
-   double Tsft = 360.0
+   //double tobs = 40551300.0;
+   double Tsft = 360.0;
    double fdiff_allowed = 1.0/Tsft;
    double dfdiff_allowed = fdiff_allowed;
    double skydiff_allowed = 0.04*200.0;
