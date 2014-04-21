@@ -142,9 +142,9 @@ struct gengetopt_args_info
   double templateSearchAsini_arg;	/**< @brief The template search Asini; templateSearch flag is required.  */
   char * templateSearchAsini_orig;	/**< @brief The template search Asini; templateSearch flag is required original value given at command line.  */
   const char *templateSearchAsini_help; /**< @brief The template search Asini; templateSearch flag is required help description.  */
-  double templateSearchAsiniSigma_arg;	/**< @brief The template search uncertainty in Asini; templateSearcht flag is required.  */
-  char * templateSearchAsiniSigma_orig;	/**< @brief The template search uncertainty in Asini; templateSearcht flag is required original value given at command line.  */
-  const char *templateSearchAsiniSigma_help; /**< @brief The template search uncertainty in Asini; templateSearcht flag is required help description.  */
+  double templateSearchAsiniSigma_arg;	/**< @brief The template search uncertainty in Asini; templateSearch flag is required.  */
+  char * templateSearchAsiniSigma_orig;	/**< @brief The template search uncertainty in Asini; templateSearch flag is required original value given at command line.  */
+  const char *templateSearchAsiniSigma_help; /**< @brief The template search uncertainty in Asini; templateSearch flag is required help description.  */
   int ihsfactor_arg;	/**< @brief Number of harmonics to sum in IHS algorithm (default='5').  */
   char * ihsfactor_orig;	/**< @brief Number of harmonics to sum in IHS algorithm original value given at command line.  */
   const char *ihsfactor_help; /**< @brief Number of harmonics to sum in IHS algorithm help description.  */

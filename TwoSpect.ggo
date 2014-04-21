@@ -44,7 +44,7 @@ option "periodFracToCheck"  - "Number of fractional periods to check in the sens
 option "templateSearch" - "Flag for doing a pure template-based search on search region specified by (sky,f,fspan,P, Asini +- 3 AsiniSigma)" flag off
 option "templateSearchP" - "The template search period; templateSearch flag is required" double dependon="templateSearch" optional
 option "templateSearchAsini" - "The template search Asini; templateSearch flag is required" double dependon="templateSearch" optional
-option "templateSearchAsiniSigma" - "The template search uncertainty in Asini; templateSearcht flag is required" double dependon="templateSearch" optional
+option "templateSearchAsiniSigma" - "The template search uncertainty in Asini; templateSearch flag is required" double dependon="templateSearch" optional
 
 section "TwoSpect threshold settings"
 option "ihsfactor" - "Number of harmonics to sum in IHS algorithm" int default="5" optional

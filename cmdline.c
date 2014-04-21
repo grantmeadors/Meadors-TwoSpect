@@ -74,7 +74,7 @@ const char *gengetopt_args_info_full_help[] = {
   "      --templateSearch          Flag for doing a pure template-based search on\n                                  search region specified by (sky,f,fspan,P,\n                                  Asini +- 3 AsiniSigma)  (default=off)",
   "      --templateSearchP=DOUBLE  The template search period; templateSearch flag\n                                  is required",
   "      --templateSearchAsini=DOUBLE\n                                The template search Asini; templateSearch flag\n                                  is required",
-  "      --templateSearchAsiniSigma=DOUBLE\n                                The template search uncertainty in Asini;\n                                  templateSearcht flag is required",
+  "      --templateSearchAsiniSigma=DOUBLE\n                                The template search uncertainty in Asini;\n                                  templateSearch flag is required",
   "\nTwoSpect threshold settings:",
   "      --ihsfactor=INT           Number of harmonics to sum in IHS algorithm\n                                  (default=`5')",
   "      --ihsfar=DOUBLE           IHS FAR threshold",
@@ -2306,7 +2306,7 @@ cmdline_parser_internal (
               goto failure;
           
           }
-          /* The template search uncertainty in Asini; templateSearcht flag is required.  */
+          /* The template search uncertainty in Asini; templateSearch flag is required.  */
           else if (strcmp (long_options[option_index].name, "templateSearchAsiniSigma") == 0)
           {
           

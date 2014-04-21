@@ -43,12 +43,18 @@ INT4 main(void) {
    gsl_set_error_handler_off();
 
    FILE *H1CANDS, *L1CANDS;
-   const char *infile1 = "/Users/evgoet/Documents/MATLAB/pulsar/S6/500-520HzH1Candidates.dat";
-   const char *infile2 = "/Users/evgoet/Documents/MATLAB/pulsar/S6/500-520HzL1Candidates.dat";
-   const char *outfile1 = "/Users/evgoet/Documents/MATLAB/pulsar/S6/500-520HzCandidates_output1.dat";
-   const char *outfile2 = "/Users/evgoet/Documents/MATLAB/pulsar/S6/500-520HzCandidates_output2.dat";
-   const char *outfile3 = "/Users/evgoet/Documents/MATLAB/pulsar/S6/500-520HzCandidates_final_H1L1.dat";
-   const char *outfile4 = "/Users/evgoet/Documents/MATLAB/pulsar/S6/500-520HzCandidates_output3.dat";
+   //const char *infile1 = "/Users/evgoet/Documents/MATLAB/pulsar/S6/500-520HzH1Candidates.dat";
+   //const char *infile2 = "/Users/evgoet/Documents/MATLAB/pulsar/S6/500-520HzL1Candidates.dat";
+   //const char *outfile1 = "/Users/evgoet/Documents/MATLAB/pulsar/S6/500-520HzCandidates_output1.dat";
+   //const char *outfile2 = "/Users/evgoet/Documents/MATLAB/pulsar/S6/500-520HzCandidates_output2.dat";
+   //const char *outfile3 = "/Users/evgoet/Documents/MATLAB/pulsar/S6/500-520HzCandidates_final_H1L1.dat";
+   //const char *outfile4 = "/Users/evgoet/Documents/MATLAB/pulsar/S6/500-520HzCandidates_output3.dat";
+   const char *infile1 = "/home/gmeadors/ScoX1/candidates/H1open/ProbabilityMinimaH1.txt";
+   const char *infile2 = "/home/gmeadors/ScoX1/candidates/L1open/ProbabilityMinimaL1.txt";
+   const char *outfile1 = "/home/gmeadors/ScoX1/candidates/outputH1L1open/Candidates_output1.dat";
+   const char *outfile2 = "/home/gmeadors/ScoX1/candidates/outputH1L1open/Candidates_output2.dat";
+   const char *outfile3 = "/home/gmeadors/ScoX1/candidates/outputH1L1open/Candidates_final_H1L1.dat";
+   const char *outfile4 = "/home/gmeadors/ScoX1/candidates/outputH1L1open/Candidates_output3.dat";
 
    XLAL_CHECK( (H1CANDS = fopen(infile1,"r")) != NULL, XLAL_EIO, "Can't fopen %s", infile1 );
 
@@ -142,8 +148,11 @@ INT4 main(void) {
    gsl_root_fsolver *s = NULL;
    XLAL_CHECK( (s = gsl_root_fsolver_alloc(T)) != NULL, XLAL_EFUNC );
 
+   // Values of fdiff_allowed, dfdiff_allowed changed for ScoX1
+   // tobs unchanged by Pdiff_allowed, the only affected result, is changed
    double tobs = 40551300.0;
-   double fdiff_allowed = 1.0/1800.0;
+   double Tsft = 360.0
+   double fdiff_allowed = 1.0/Tsft;
    double dfdiff_allowed = fdiff_allowed;
    double skydiff_allowed = 0.04*200.0;
    int numpassingf = 0, numpassingdf = 0, numpassingP = 0, numpassingskyloc = 0;
@@ -189,8 +198,11 @@ INT4 main(void) {
                   if (fabs(allh1cands_sorted[ii*9+2]-alll1cands_sorted[jj*9+2])<=dfdiff_allowed) {
                      numpassingdf++;
                      //Check the period and harmonic values
-                     double Pdiff_allowed = allh1cands_sorted[ii*9+1]*allh1cands_sorted[ii*9+1]*sqrt(3.6e-3/allh1cands_sorted[ii*9+2])/(4.5*tobs);
-                     double Pdiff_allowed_2 = alll1cands_sorted[jj*9+1]*alll1cands_sorted[jj*9+1]*sqrt(3.6e-3/alll1cands_sorted[jj*9+2])/(4.5*tobs);
+                     // Changed Pdiff_allowed for Scorpius X-1
+                     //double Pdiff_allowed = allh1cands_sorted[ii*9+1]*allh1cands_sorted[ii*9+1]*sqrt(3.6e-3/allh1cands_sorted[ii*9+2])/(4.5*tobs);
+                     double Pdiff_allowed = 2.7*(Tsft/1800)+1.8;
+                     //double Pdiff_allowed_2 = alll1cands_sorted[jj*9+1]*alll1cands_sorted[jj*9+1]*sqrt(3.6e-3/alll1cands_sorted[jj*9+2])/(4.5*tobs);
+                     double Pdiff_allowed_2 = 2.7*(Tsft/1800)+1.8;
                      int foundmatch = 0, passedtestP = 0;
                      for (int kk=1; kk<=7; kk++) {
                         double P1factor = 0.0;
@@ -237,8 +249,11 @@ INT4 main(void) {
                numpassingf++;
                if (fabs(allh1cands_sorted[ii*9+2]-alll1cands_sorted[jj*9+2])<=dfdiff_allowed) {
                   numpassingdf++;
-                  double Pdiff_allowed = allh1cands_sorted[ii*9+1]*allh1cands_sorted[ii*9+1]*sqrt(3.6e-3/allh1cands_sorted[ii*9+2])/(4.5*tobs);
-                  double Pdiff_allowed_2 = alll1cands_sorted[jj*9+1]*alll1cands_sorted[jj*9+1]*sqrt(3.6e-3/alll1cands_sorted[jj*9+2])/(4.5*tobs);
+                  // Changed Pdiff_allowed for Scorpius X-1
+                  //double Pdiff_allowed = allh1cands_sorted[ii*9+1]*allh1cands_sorted[ii*9+1]*sqrt(3.6e-3/allh1cands_sorted[ii*9+2])/(4.5*tobs);
+                  double Pdiff_allowed = 2.7*(Tsft/1800)+1.8;
+                  //double Pdiff_allowed_2 = alll1cands_sorted[jj*9+1]*alll1cands_sorted[jj*9+1]*sqrt(3.6e-3/alll1cands_sorted[jj*9+2])/(4.5*tobs);
+                  double Pdiff_allowed_2 = 2.7*(Tsft/1800)+1.8;
                   int foundmatch = 0, passedtestP = 0;
                   for (int kk=1; kk<=7; kk++) {
                      double P1factor = 0.0;
@@ -284,8 +299,11 @@ INT4 main(void) {
                numpassingf++;
                if (fabs(allh1cands_sorted[ii*9+2]-alll1cands_sorted[jj*9+2])<=dfdiff_allowed) {
                   numpassingdf++;
-                  double Pdiff_allowed = allh1cands_sorted[ii*9+1]*allh1cands_sorted[ii*9+1]*sqrt(3.6e-3/allh1cands_sorted[ii*9+2])/(4.5*tobs);
-                  double Pdiff_allowed_2 = alll1cands_sorted[jj*9+1]*alll1cands_sorted[jj*9+1]*sqrt(3.6e-3/alll1cands_sorted[jj*9+2])/(4.5*tobs);
+                  // Changed Pdiff_allowed for Scorpius X-1
+                  //double Pdiff_allowed = allh1cands_sorted[ii*9+1]*allh1cands_sorted[ii*9+1]*sqrt(3.6e-3/allh1cands_sorted[ii*9+2])/(4.5*tobs);
+                  double Pdiff_allowed = 2.7*(Tsft/1800)+1.8;
+                  //double Pdiff_allowed_2 = alll1cands_sorted[jj*9+1]*alll1cands_sorted[jj*9+1]*sqrt(3.6e-3/alll1cands_sorted[jj*9+2])/(4.5*tobs);
+                  double Pdiff_allowed_2 = 2.7*(Tsft/1800)+1.8;
                   int foundmatch = 0, passedtestP = 0;
                   for (int kk=1; kk<=7; kk++) {
                      double P1factor = 0.0;
