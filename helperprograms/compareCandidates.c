@@ -49,12 +49,12 @@ INT4 main(void) {
    //const char *outfile2 = "/Users/evgoet/Documents/MATLAB/pulsar/S6/500-520HzCandidates_output2.dat";
    //const char *outfile3 = "/Users/evgoet/Documents/MATLAB/pulsar/S6/500-520HzCandidates_final_H1L1.dat";
    //const char *outfile4 = "/Users/evgoet/Documents/MATLAB/pulsar/S6/500-520HzCandidates_output3.dat";
-   const char *infile1 = "/home/gmeadors/ScoX1/candidates/H1open/ProbabilityMinimaH1.txt";
-   const char *infile2 = "/home/gmeadors/ScoX1/candidates/L1open/ProbabilityMinimaL1.txt";
-   const char *outfile1 = "/home/gmeadors/ScoX1/candidates/360s/outputH1L1open/Candidates_output1.dat";
-   const char *outfile2 = "/home/gmeadors/ScoX1/candidates/360s/outputH1L1open/Candidates_output2.dat";
-   const char *outfile3 = "/home/gmeadors/ScoX1/candidates/360s/outputH1L1open/Candidates_final_H1L1.dat";
-   const char *outfile4 = "/home/gmeadors/ScoX1/candidates/360s/outputH1L1open/Candidates_output3.dat";
+   const char *infile1 = "/home/gmeadors/ScoX1/candidates/H1closed/ProbabilityMinimaH1.txt";
+   const char *infile2 = "/home/gmeadors/ScoX1/candidates/L1closed/ProbabilityMinimaL1.txt";
+   const char *outfile1 = "/home/gmeadors/ScoX1/candidates/840s/outputH1L1closed/Candidates_output1.dat";
+   const char *outfile2 = "/home/gmeadors/ScoX1/candidates/840s/outputH1L1closed/Candidates_output2.dat";
+   const char *outfile3 = "/home/gmeadors/ScoX1/candidates/840s/outputH1L1closed/Candidates_final_H1L1.dat";
+   const char *outfile4 = "/home/gmeadors/ScoX1/candidates/840s/outputH1L1closed/Candidates_output3.dat";
 
    XLAL_CHECK( (H1CANDS = fopen(infile1,"r")) != NULL, XLAL_EIO, "Can't fopen %s", infile1 );
 
@@ -151,7 +151,7 @@ INT4 main(void) {
    // Values of fdiff_allowed, dfdiff_allowed changed for ScoX1
    // tobs unchanged by Pdiff_allowed, the only affected result, is changed
    //double tobs = 40551300.0;
-   double Tsft = 360.0;
+   double Tsft = 840.0;
    double fdiff_allowed = 1.0/Tsft;
    double dfdiff_allowed = fdiff_allowed;
    double skydiff_allowed = 0.04*200.0;
