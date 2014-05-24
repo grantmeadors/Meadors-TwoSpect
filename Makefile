@@ -62,7 +62,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_compareCandidates_OBJECTS = compareCandidates.$(OBJEXT)
+am_compareCandidates_OBJECTS = compareCandidates.$(OBJEXT) \
+	cmdline_compareCandidates.$(OBJEXT)
 compareCandidates_OBJECTS = $(am_compareCandidates_OBJECTS)
 compareCandidates_LDADD = $(LDADD)
 compareCandidates_DEPENDENCIES =  \
@@ -84,9 +85,7 @@ skygridsetup_OBJECTS = $(am_skygridsetup_OBJECTS)
 skygridsetup_LDADD = $(LDADD)
 skygridsetup_DEPENDENCIES = $(top_builddir)/src/lalapps/liblalapps.la
 am_testVectorMath_OBJECTS = testVectorMath.$(OBJEXT) \
-	vectormath.$(OBJEXT) templates.$(OBJEXT) candidates.$(OBJEXT) \
-	statistics.$(OBJEXT) fastchisqinv.$(OBJEXT) \
-	cdfwchisq.$(OBJEXT)
+	vectormath.$(OBJEXT)
 testVectorMath_OBJECTS = $(am_testVectorMath_OBJECTS)
 testVectorMath_LDADD = $(LDADD)
 testVectorMath_DEPENDENCIES =  \
@@ -284,7 +283,7 @@ build_cpu = x86_64
 build_os = linux-gnu
 build_vendor = unknown
 builddir = .
-configure_date = 2014-05-14T21:02:13-0700
+configure_date = 2014-05-24T15:13:17-0700
 datadir = ${datarootdir}
 datarootdir = ${prefix}/share
 docdir = ${datarootdir}/doc/${PACKAGE_TARNAME}
@@ -333,11 +332,10 @@ lalapps_TwoSpect_SOURCES = cmdline.c statistics.c fastchisqinv.c IHS.c candidate
 skygridsetup_SOURCES = helperprograms/skygridsetup.c helperprograms/cmdline_skygridsetup.c antenna.c \
                        helperprograms/cmdline_skygridsetup.h antenna.h
 
-compareCandidates_SOURCES = helperprograms/compareCandidates.c
-testVectorMath_SOURCES = helperprograms/testVectorMath.c vectormath.c templates.c candidates.c statistics.c \
-                         fastchisqinv.c cdfwchisq.c vectormath.h templates.h candidates.h statistics.h \
-                         fastchisqinv.h cdfwchisq.h
+compareCandidates_SOURCES = helperprograms/compareCandidates.c helperprograms/cmdline_compareCandidates.c \
+                            helperprograms/cmdline_compareCandidates.h
 
+testVectorMath_SOURCES = helperprograms/testVectorMath.c vectormath.c vectormath.h
 BUILT_SOURCES = vcsID
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -442,6 +440,7 @@ include ./$(DEPDIR)/antenna.Po
 include ./$(DEPDIR)/candidates.Po
 include ./$(DEPDIR)/cdfwchisq.Po
 include ./$(DEPDIR)/cmdline.Po
+include ./$(DEPDIR)/cmdline_compareCandidates.Po
 include ./$(DEPDIR)/cmdline_skygridsetup.Po
 include ./$(DEPDIR)/compareCandidates.Po
 include ./$(DEPDIR)/fastchisqinv.Po
@@ -491,6 +490,22 @@ compareCandidates.obj: helperprograms/compareCandidates.c
 #	source='helperprograms/compareCandidates.c' object='compareCandidates.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o compareCandidates.obj `if test -f 'helperprograms/compareCandidates.c'; then $(CYGPATH_W) 'helperprograms/compareCandidates.c'; else $(CYGPATH_W) '$(srcdir)/helperprograms/compareCandidates.c'; fi`
+
+cmdline_compareCandidates.o: helperprograms/cmdline_compareCandidates.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT cmdline_compareCandidates.o -MD -MP -MF $(DEPDIR)/cmdline_compareCandidates.Tpo -c -o cmdline_compareCandidates.o `test -f 'helperprograms/cmdline_compareCandidates.c' || echo '$(srcdir)/'`helperprograms/cmdline_compareCandidates.c
+	$(AM_V_at)$(am__mv) $(DEPDIR)/cmdline_compareCandidates.Tpo $(DEPDIR)/cmdline_compareCandidates.Po
+#	$(AM_V_CC) \
+#	source='helperprograms/cmdline_compareCandidates.c' object='cmdline_compareCandidates.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o cmdline_compareCandidates.o `test -f 'helperprograms/cmdline_compareCandidates.c' || echo '$(srcdir)/'`helperprograms/cmdline_compareCandidates.c
+
+cmdline_compareCandidates.obj: helperprograms/cmdline_compareCandidates.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT cmdline_compareCandidates.obj -MD -MP -MF $(DEPDIR)/cmdline_compareCandidates.Tpo -c -o cmdline_compareCandidates.obj `if test -f 'helperprograms/cmdline_compareCandidates.c'; then $(CYGPATH_W) 'helperprograms/cmdline_compareCandidates.c'; else $(CYGPATH_W) '$(srcdir)/helperprograms/cmdline_compareCandidates.c'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/cmdline_compareCandidates.Tpo $(DEPDIR)/cmdline_compareCandidates.Po
+#	$(AM_V_CC) \
+#	source='helperprograms/cmdline_compareCandidates.c' object='cmdline_compareCandidates.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o cmdline_compareCandidates.obj `if test -f 'helperprograms/cmdline_compareCandidates.c'; then $(CYGPATH_W) 'helperprograms/cmdline_compareCandidates.c'; else $(CYGPATH_W) '$(srcdir)/helperprograms/cmdline_compareCandidates.c'; fi`
 
 skygridsetup.o: helperprograms/skygridsetup.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT skygridsetup.o -MD -MP -MF $(DEPDIR)/skygridsetup.Tpo -c -o skygridsetup.o `test -f 'helperprograms/skygridsetup.c' || echo '$(srcdir)/'`helperprograms/skygridsetup.c
