@@ -985,7 +985,7 @@ INT4 bruteForceTemplateSearch(candidate *output, candidate input, REAL8 fminimum
                 trialb->data[jj]<maxModDepth(trialp->data[kk], params->Tcoh) &&
                 trialp->data[kk]>minPeriod(trialb->data[jj], params->Tcoh) &&
                 trialp->data[kk]<=(0.2*params->Tobs) &&
-                trialp->data[kk]>=(2.0*3600.0) &&
+                trialp->data[kk]>=(4.0*params->Tcoh) &&
                 trialb->data[jj]>=params->dfmin &&
                 trialb->data[jj]<=params->dfmax &&
                 trialp->data[kk]<=params->Pmax &&
@@ -1111,7 +1111,7 @@ INT4 bruteForceTemplateTest(candidateVector **output, candidate input, REAL8 fmi
                 trialb->data[jj]<maxModDepth(trialp->data[kk], params->Tcoh) &&
                 trialp->data[kk]>minPeriod(trialb->data[jj], params->Tcoh) &&
                 trialp->data[kk]<=(0.2*params->Tobs) &&
-                trialp->data[kk]>=(2.0*3600.0) &&
+                trialp->data[kk]>=(4.0*params->Tcoh) &&
                 trialb->data[jj]>=params->dfmin &&
                 trialb->data[jj]<=params->dfmax &&
                 trialp->data[kk]<=params->Pmax &&
@@ -1195,15 +1195,15 @@ INT4 templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 f
        and it gives us a bit of extra data*/
        //REAL8 asinisigma = 0.18;
        REAL8 moddepth = 0.8727*(trialf->data[ii]/1000.0)*(7200.0/period)*asini;
-       printf("Making the first computation involving asinisigma, for moddepthmin\n");
+       printf(stderr,"Making the first computation involving asinisigma, for moddepthmin\n");
        REAL8 moddepthspan = 0.8727*(trialf->data[numfsteps-1]/1000.0)*(7200.0/period)*6*asinisigma;
-       printf("intended moddepthspan: %f \n", moddepthspan);
-       //printf("Done with moddepthspan, making moddepthmin\n");
+       printf(stderr,"intended moddepthspan: %f \n", moddepthspan);
+       //printf(stderr,"Done with moddepthspan, making moddepthmin\n");
        REAL8 moddepthmin = moddepth - 0.5*moddepthspan;
-       printf("intended moddepthmin: %f \n", moddepthmin);
+       printf(stderr,"intended moddepthmin: %f \n", moddepthmin);
        INT4 numdfsteps = (INT4)round(4.0*moddepthspan*params->Tcoh) + 1;
        //INT4 numdfsteps = (INT4)round(4.0*moddepthspan*params->Tcoh) + 1;
-       printf("intended numdfsteps: %d \n", numdfsteps);
+       printf(stderr,"intended numdfsteps: %d \n", numdfsteps);
        trialdf = XLALCreateREAL8Vector(numdfsteps);
        XLAL_CHECK( trialdf != NULL, XLAL_EFUNC);
        dfstepsize = moddepthspan/(REAL8)(numdfsteps-1);
@@ -1216,7 +1216,7 @@ INT4 templateSearch_scox1Style(candidateVector **output, REAL8 fminimum, REAL8 f
         //REAL8 moddepth = 0.8727*(trialf->data[ii]/1000.0)*(7200.0/period)*asini;
 
         //load candidate
-        //printf("Loading candidate. Remember to get the RA and dec from outside in production run\n");
+        //printf(stderr,"Loading candidate. Remember to get the RA and dec from outside in production run\n");
         loadCandidateData(&cand, trialf->data[ii], period, trialdf->data[jj], ra, dec, 0, 0, 0.0, 0, 0.0);
 
         //Make the template

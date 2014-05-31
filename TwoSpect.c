@@ -58,12 +58,6 @@ CHAR *sft_dir_file = NULL;
 //Main program
 int main(int argc, char *argv[])
 {
-   printf("Directed TwoSpect: development version\n\
-       Work in progress \n\
-       Not yet reviewed \n\
-       Test code as of 2014-05-24 \n\
-       Grant David Meadors, Evan Goetz and Keith Riles.\n");
-
    INT4 ii, jj;               //counter variables
    LALStatus XLAL_INIT_DECL(status);
    char s[1000], t[1000], u[1000];   //Path and file name to LOG, ULFILE, and NORMRMSOUT
@@ -197,7 +191,6 @@ int main(int argc, char *argv[])
    fprintf(stderr, "FAR for templates = %g\n", inputParams->templatefar);
 
    //Allocate memory for ffdata structure
-   
    ffdataStruct *ffdata = NULL;
    XLAL_CHECK( (ffdata = new_ffdata(inputParams)) != NULL, XLAL_EFUNC );
 
@@ -704,9 +697,9 @@ int main(int argc, char *argv[])
       //If the user wants to do a template search, that is done here
       if (args_info.templateSearch_given) {
 
-         printf("Calling templateSearch\n");
+         printf(stderr, "Calling templateSearch\n (in development, last edited 2014-05-30)\n");
          XLAL_CHECK( templateSearch_scox1Style(&exactCandidates2, inputParams->fmin, inputParams->fspan, args_info.templateSearchP_arg, args_info.templateSearchAsini_arg, args_info.templateSearchAsiniSigma_arg, dopplerpos.Alpha, dopplerpos.Delta, inputParams, ffdata->ffdata, sftexist, aveNoise,  aveTFnoisePerFbinRatio,  secondFFTplan, 1) == XLAL_SUCCESS, XLAL_EFUNC );
-         printf("Done calling templateSearch\n");
+         printf(stderr, "Done calling templateSearch\n");
 
 
          for (ii=0; ii<(INT4)exactCandidates2->numofcandidates; ii++) exactCandidates2->data[ii].h0 /= sqrt(ffdata->tfnormalization)*pow(frac_tobs_complete*ffdata->ffnormalization/skypointffnormalization,0.25);
@@ -2524,13 +2517,10 @@ INT4 readTwoSpectInputParams(inputParamsStruct *params, struct gengetopt_args_in
       fprintf(LOG,"WARNING! Adjusting input maximum period to 1/5 the observation time!\n");
       fprintf(stderr,"WARNING! Adjusting input maximum period to 1/5 the observation time!\n");
    }
-   // 2 hour minimum period is too small for a search of J1751
-   // So we can do 2 minutes instead
-   // Commented out 2014-02-06 by Grant David Meadors
-   if (params->Pmin < 2.0*60) {
-      params->Pmin = 2.0*60;
-      fprintf(LOG,"WARNING! Adjusting input minimum period to 2 minutes!\n");
-      fprintf(stderr,"WARNING! Adjusting input minimum period to 2 minutes!\n");
+   if (params->Pmin < 4.0*(params->Tcoh)) {
+      params->Pmin = 4.0*(params->Tcoh);
+      fprintf(LOG,"WARNING! Adjusting input minimum period to 4 coherence times!\n");
+      fprintf(stderr,"WARNING! Adjusting input minimum period to 4 coherence times!\n");
    }
    if (params->dfmax > maxModDepth(params->Pmax, params->Tcoh)) {
       params->dfmax = floor(maxModDepth(params->Pmax, params->Tcoh)*(params->Tcoh))/(params->Tcoh);
