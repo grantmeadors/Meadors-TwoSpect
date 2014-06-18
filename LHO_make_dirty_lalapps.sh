@@ -20,21 +20,23 @@ LSCSOFT_ROOTDIR=${LSCSOFT_ROOTDIR:-"${HOME}/master"}
 #./configure --prefix=${LALPULSAR_PREFIX} --disable-gcc-flags --disable-debug
 #make -j3 install
 
-cd ${LSCSOFT_SRCDIR}/lalsuite/lalapps
+#cd ${LSCSOFT_SRCDIR}/lalsuite/lalapps
+#./00boot
+#CFLAGS="-O3 -msse -msse2"
+#./configure --prefix=${LALAPPS_PREFIX} --enable-condor --disable-gcc-flags --disable-debug
+#make -j3 install
+
+LALAPPS_PREFIX=${LALAPPS_PREFIX:-"${LSCSOFT_ROOTDIR}/opt/lscsoft/lalapps"}
 ./00boot
 CFLAGS="-O3 -msse -msse2"
-./configure --prefix=${LALAPPS_PREFIX} --enable-condor --disable-gcc-flags --disable-debug
-make -j3 install
-
-#./configure --prefix=${LALAPPS_PREFIX} --enable-condor
-#make
-#make install
-
-cd /usr1/gmeadors/src/lscsoft/lalsuite/lalapps/src/pulsar/TwoSpect/
-source ${LSCSOFT_ROOTDIR}/etc/lscsoftrc
-CFLAGS="-O3 -msse -msse2"
-LALAPPS_PREFIX=${LALAPPS_PREFIX:-"${LSCSOFT_ROOTDIR}/opt/lscsoft/lalapps"}
 ./configure --prefix=${LALAPPS_PREFIX} --enable-condor
 make -j3 install
 source ${LSCSOFT_ROOTDIR}/etc/lscsoftrc
+
+#cd /usr1/gmeadors/src/lscsoft/lalsuite/lalapps/src/pulsar/TwoSpect/
+#source ${LSCSOFT_ROOTDIR}/etc/lscsoftrc
+#CFLAGS="-O3 -msse -msse2"
+#./configure --prefix=${LALAPPS_PREFIX} --enable-condor
+#make -j3 install
+#source ${LSCSOFT_ROOTDIR}/etc/lscsoftrc
 
