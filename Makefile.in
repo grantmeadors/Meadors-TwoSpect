@@ -34,11 +34,11 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(top_srcdir)/gnuscripts/lalapps.am
 bin_PROGRAMS = lalapps_TwoSpect$(EXEEXT)
 EXTRA_PROGRAMS = skygridsetup$(EXEEXT) compareCandidates$(EXEEXT) \
 	testVectorMath$(EXEEXT)
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(top_srcdir)/gnuscripts/vcsID.common
 subdir = src/pulsar/TwoSpect
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/gnuscripts/ax_blas.m4 \
@@ -127,7 +127,7 @@ DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_CFLAGS = @AM_CFLAGS@
-AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/lalapps -DPKG_DATA_DIR='"$(pkgdatadir)/"' @AM_CPPFLAGS@
+AM_CPPFLAGS = @AM_CPPFLAGS@
 AM_CXXFLAGS = @AM_CXXFLAGS@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@
@@ -172,6 +172,7 @@ ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
+END_OF_LIST = @END_OF_LIST@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FC = @FC@
@@ -183,7 +184,6 @@ FGREP = @FGREP@
 FLIBS = @FLIBS@
 FRAME_CFLAGS = @FRAME_CFLAGS@
 FRAME_LIBS = @FRAME_LIBS@
-GENERATE_VCS_INFO = @GENERATE_VCS_INFO@
 GIT = @GIT@
 GREP = @GREP@
 GSL_CFLAGS = @GSL_CFLAGS@
@@ -241,6 +241,9 @@ OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
+PACKAGE_NAME_LCASE = @PACKAGE_NAME_LCASE@
+PACKAGE_NAME_NOLAL = @PACKAGE_NAME_NOLAL@
+PACKAGE_NAME_UCASE = @PACKAGE_NAME_UCASE@
 PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
@@ -289,8 +292,6 @@ datarootdir = @datarootdir@
 docdir = @docdir@
 dvidir = @dvidir@
 exec_prefix = @exec_prefix@
-genvcsinfo_ = @genvcsinfo_@
-genvcsinfo_0 = @genvcsinfo_0@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
@@ -324,6 +325,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 LDADD = $(top_builddir)/src/lalapps/liblalapps.la
+BUILT_SOURCES = liblalapps
 lalapps_TwoSpect_SOURCES = cmdline.c statistics.c fastchisqinv.c IHS.c candidates.c templates.c antenna.c \
                            vectormath.c cdfwchisq.c upperlimits.c TwoSpect.c \
 			   cmdline.h TwoSpectTypes.h statistics.h fastchisqinv.h IHS.h candidates.h templates.h \
@@ -336,13 +338,12 @@ compareCandidates_SOURCES = helperprograms/compareCandidates.c helperprograms/cm
                             helperprograms/cmdline_compareCandidates.h
 
 testVectorMath_SOURCES = helperprograms/testVectorMath.c vectormath.c vectormath.h
-BUILT_SOURCES = vcsID
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(top_srcdir)/gnuscripts/vcsID.common $(am__configure_deps)
+$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(top_srcdir)/gnuscripts/lalapps.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -764,7 +765,8 @@ uninstall-am: uninstall-binPROGRAMS
 	pdf pdf-am ps ps-am tags uninstall uninstall-am \
 	uninstall-binPROGRAMS
 
-vcsID:
+.PHONY: liblalapps
+liblalapps:
 	@cd $(top_builddir)/src/lalapps && $(MAKE) liblalapps.la
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

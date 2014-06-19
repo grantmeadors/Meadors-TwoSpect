@@ -34,11 +34,11 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = x86_64-unknown-linux-gnu
 host_triplet = x86_64-unknown-linux-gnu
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(top_srcdir)/gnuscripts/lalapps.am
 bin_PROGRAMS = lalapps_TwoSpect$(EXEEXT)
 EXTRA_PROGRAMS = skygridsetup$(EXEEXT) compareCandidates$(EXEEXT) \
 	testVectorMath$(EXEEXT)
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(top_srcdir)/gnuscripts/vcsID.common
 subdir = src/pulsar/TwoSpect
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/gnuscripts/ax_blas.m4 \
@@ -127,7 +127,7 @@ DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = ${SHELL} /usr1/gmeadors/src/lscsoft/lalsuite/lalapps/gnuscripts/missing --run aclocal-1.11
 AMTAR = ${SHELL} /usr1/gmeadors/src/lscsoft/lalsuite/lalapps/gnuscripts/missing --run tar
 AM_CFLAGS =  -g -O2  
-AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/lalapps -DPKG_DATA_DIR='"$(pkgdatadir)/"'  -I/home/gmeadors/master/opt/lscsoft/lalstochastic/include  -I/home/gmeadors/master/opt/lscsoft/lalinference/include  -I/home/gmeadors/master/opt/lscsoft/lalpulsar/include  -I/home/gmeadors/master/opt/lscsoft/lalinspiral/include  -I/home/gmeadors/master/opt/lscsoft/lalburst/include  -I/home/gmeadors/master/opt/lscsoft/lalsimulation/include  -I/home/gmeadors/master/opt/lscsoft/lalmetaio/include  -I/home/gmeadors/master/opt/lscsoft/lalframe/include  -I/home/gmeadors/master/opt/lscsoft/lal/include  
+AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/lalapps -I$(top_builddir)/src/lalapps -DPKG_DATA_DIR='"$(pkgdatadir)/"'  -I/home/gmeadors/master/opt/lscsoft/lalstochastic/include  -I/home/gmeadors/master/opt/lscsoft/lalinference/include  -I/home/gmeadors/master/opt/lscsoft/lalpulsar/include  -I/home/gmeadors/master/opt/lscsoft/lalinspiral/include  -I/home/gmeadors/master/opt/lscsoft/lalburst/include  -I/home/gmeadors/master/opt/lscsoft/lalsimulation/include  -I/home/gmeadors/master/opt/lscsoft/lalmetaio/include  -I/home/gmeadors/master/opt/lscsoft/lalframe/include  -I/home/gmeadors/master/opt/lscsoft/lal/include  
 AM_CXXFLAGS =  
 AM_DEFAULT_VERBOSITY = 0
 AM_FCFLAGS =  
@@ -172,6 +172,7 @@ ECHO_C =
 ECHO_N = -n
 ECHO_T = 
 EGREP = /bin/grep -E
+END_OF_LIST = 
 EXEEXT = 
 F77 = 
 FC = 
@@ -183,7 +184,6 @@ FGREP = /bin/grep -F
 FLIBS = 
 FRAME_CFLAGS =  
 FRAME_LIBS = -lm -lFrame  
-GENERATE_VCS_INFO = $(PYTHON) $(top_srcdir)/../gnuscripts/generate_vcs_info.py --git-path='$(GIT)' $(genvcsinfo_$(V))
 GIT = /usr/bin/git
 GREP = /bin/grep
 GSL_CFLAGS =  
@@ -240,8 +240,11 @@ OTOOL =
 OTOOL64 = 
 PACKAGE = lalapps
 PACKAGE_BUGREPORT = lal-discuss@ligo.org
-PACKAGE_NAME = lalapps
-PACKAGE_STRING = lalapps 6.14.0.1
+PACKAGE_NAME = LALApps
+PACKAGE_NAME_LCASE = lalapps
+PACKAGE_NAME_NOLAL = Apps
+PACKAGE_NAME_UCASE = LALAPPS
+PACKAGE_STRING = LALApps 6.14.0.1
 PACKAGE_TARNAME = lalapps
 PACKAGE_VERSION = 6.14.0.1
 PATH_SEPARATOR = :
@@ -283,14 +286,12 @@ build_cpu = x86_64
 build_os = linux-gnu
 build_vendor = unknown
 builddir = .
-configure_date = 2014-06-11T20:28:21-0700
+configure_date = 2014-06-18T18:48:18-0700
 datadir = ${datarootdir}
 datarootdir = ${prefix}/share
 docdir = ${datarootdir}/doc/${PACKAGE_TARNAME}
 dvidir = ${docdir}
 exec_prefix = ${prefix}
-genvcsinfo_ = $(genvcsinfo_$(AM_DEFAULT_VERBOSITY))
-genvcsinfo_0 = --am-v-gen='$(AM_V_GEN)'
 host = x86_64-unknown-linux-gnu
 host_alias = 
 host_cpu = x86_64
@@ -324,6 +325,7 @@ top_build_prefix = ../../../
 top_builddir = ../../..
 top_srcdir = ../../..
 LDADD = $(top_builddir)/src/lalapps/liblalapps.la
+BUILT_SOURCES = liblalapps
 lalapps_TwoSpect_SOURCES = cmdline.c statistics.c fastchisqinv.c IHS.c candidates.c templates.c antenna.c \
                            vectormath.c cdfwchisq.c upperlimits.c TwoSpect.c \
 			   cmdline.h TwoSpectTypes.h statistics.h fastchisqinv.h IHS.h candidates.h templates.h \
@@ -336,13 +338,12 @@ compareCandidates_SOURCES = helperprograms/compareCandidates.c helperprograms/cm
                             helperprograms/cmdline_compareCandidates.h
 
 testVectorMath_SOURCES = helperprograms/testVectorMath.c vectormath.c vectormath.h
-BUILT_SOURCES = vcsID
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(top_srcdir)/gnuscripts/vcsID.common $(am__configure_deps)
+$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(top_srcdir)/gnuscripts/lalapps.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -764,7 +765,8 @@ uninstall-am: uninstall-binPROGRAMS
 	pdf pdf-am ps ps-am tags uninstall uninstall-am \
 	uninstall-binPROGRAMS
 
-vcsID:
+.PHONY: liblalapps
+liblalapps:
 	@cd $(top_builddir)/src/lalapps && $(MAKE) liblalapps.la
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
