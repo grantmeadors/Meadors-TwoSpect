@@ -1,2 +1,2 @@
 #!/bin/bash
-cp /home/gmeadors/master/opt/lscsoft/lalapps/bin/lalapps_TwoSpect /home/gmeadors/TwoSpect/dev/bin6
+cp /home/grant.meadors/master1/opt/lscsoft/lalapps/bin/lalapps_TwoSpect /home/grant.meadors/TwoSpect/dev1/bin
