@@ -18,9 +18,9 @@ echo "source ${LALSUITE_PREFIX}/etc/lal-user-env.\`echo \$0 | tr -c -d csh\`" > 
 source ${HOME}/Documents/LALApps/etc/lalsuiterc
 
 
-#LSCSOFT_SRCDIR=${HOME}/Documents/LalApps/src/lscsoft/
-#LSCSOFT_ROOTDIR=${LSCSOFT_ROOTDIR:-"${HOME}/master1"}
-#LAL_PREFIX=${LAL_PREFIX:-"${LSCSOFT_ROOTDIR}/opt/lscsoft/lal"}
+#LSCSOFT_SRCDIR=${HOME}/Documents/LALApps/src
+#LSCSOFT_ROOTDIR=${LSCSOFT_ROOTDIR:-"${HOME}/Documents/LALApps/master"}
+#LAL_PREFIX=${LAL_PREFIX:-"${LSCSOFT_ROOTDIR}/opt/lal"}
 #cd ${LSCSOFT_SRCDIR}/lalsuite/lal
 #./00boot
 #CFLAGS="-O3 -msse -msse2 -mavx"
