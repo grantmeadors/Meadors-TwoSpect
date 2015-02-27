@@ -9,7 +9,8 @@ LALSUITE_SRCDIR=${HOME}/Documents/LALApps/src
 LALSUITE_PREFIX=${HOME}/Documents/LALApps/opt/lalsuite
 cd ${LALSUITE_SRCDIR}/lalsuite
 ./00boot
-./configure --prefix=${LALSUITE_PREFIX}
+CFLAGS="-O3 -msse -msse2 -mavx"
+./configure --prefix=${LALSUITE_PREFIX} --with-simd
 make -j
 make install
 
