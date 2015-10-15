@@ -11,7 +11,7 @@ LALSUITE_PREFIX=${HOME}/dev/followupS6/LALApps/opt/lalsuite
 cd ${LALSUITE_SRCDIR}/lalsuite
 ./00boot
 CFLAGS="-O3 -msse -msse2 -mavx"
-./configure --prefix=${LALSUITE_PREFIX} --with-simd
+./configure --prefix=${LALSUITE_PREFIX} --with-simd --enable-condor --disable-pthread-lock --disable-framec --disable-lalxml
 make -j
 make install
 
