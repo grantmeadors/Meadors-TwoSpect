@@ -1,0 +1,1 @@
+git diff TwoSpect-1.1.27 * > 0001-TwoSpect-Diff-ReviewedAllSky1.1.27-Directed-1.0.patch
