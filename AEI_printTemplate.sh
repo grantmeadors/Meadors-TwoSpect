@@ -2,7 +2,7 @@
 
 # For compiling Lalapps with Doxygen
 # Grant David Meadors
-# 02016-01-10(JD 2457398)
+# 02016-01-20 (JD 2457408)
 # g r a n t . m e a d o r s @ a e i . m p g . d e
 
 LALSUITE_SRCDIR=${HOME}/Documents/LALApps/src
@@ -17,7 +17,4 @@ make install
 mkdir ${HOME}/Documents/LALApps/etc
 echo "source ${LALSUITE_PREFIX}/etc/lal-user-env.\`echo \$0 | tr -c -d csh\`" > ${HOME}/Documents/LALApps/etc/lalsuiterc
 source ${HOME}/Documents/LALApps/etc/lalsuiterc
-
-cd ${LALSUITE_SRCDIR}/lalsuite
-make html
 
